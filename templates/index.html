@@ -85,9 +85,14 @@
             <div class="form-group" style="display: none;" id="ssl_fields">
                 <label for="ssl_cert_path">SSL Certificate Path:</label>
                 <input type="text" id="ssl_cert_path" class="form-control" name="ssl_cert_path">
-        
+            <div  style="padding-bottom: 15px;"class="form-check">
+                <input type="checkbox" class="form-check-input" id="ssl_redirect_checkbox" name="ssl_redirect_checkbox">
+                <label class="form-check-label" for="ssl_redirect_checkbox"><i style="margin: 8px;" class="fas fa-arrow-circle-right"></i>Add Redirect to HTTPS</label>
             </div>
-            <div class="form-group">
+            </div>
+            
+             
+            <div style="margin-top: 15px;" class="form-group">
                 <label for="lb_method">Load Balancing Method:</label>
                 <select class="form-control" name="lb_method">
                     <option value="roundrobin">Round Robin</option>
@@ -105,6 +110,20 @@
                 </select>
             </div>
             <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="add_dos" id="add_dos">
+            <label style="margin-bottom: 10px;" class="form-check-label" for="add_acl"><i style="margin: 8px;" class="fas fa-shield-alt"></i> Add DOS Protection</label>
+        </div>
+
+        <div class="form-group" id="dos_fields" style="display: none; padding-bottom: 20px;">
+            <label for="DOS">Limit Requests, e.g: 20:</label>
+            <input type="text" class="form-control" name="limit_requests">
+            
+            
+            <label for="Ban Duration">IP Ban Duration(in seconds, e.g: 15s):</label>
+            <input type="text" class="form-control" name="ban_duration">
+        </div>
+        
+            <div class="form-check">
             <input type="checkbox" class="form-check-input" name="add_acl" id="add_acl">
             <label style="margin-bottom: 10px;" class="form-check-label" for="add_acl"> <i style="margin: 8px;" class="fas fa-user-lock"></i> Add ACL for Frontend</label>
         </div>
@@ -116,7 +135,11 @@
             <label for="backend_name_acl">Backend Name:</label>
             <input type="text" class="form-control" name="backend_name_acl">
         </div>
-        
+        <div style="margin-top: 8px; padding-bottom: 15px;" class="form-check">
+                <input type="checkbox" class="form-check-input" id="forward_for_check" name="forward_for_check">
+                <label class="form-check-label" for="forward_for_check"><i style="margin: 8px;" class="fas fa-network-wired"></i>Use option forwardfor</label>
+            </div>
+            
 </div>
         <div style="box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border-radius: 5px;" class="container mt-5">
             <div class="form-group">
@@ -127,7 +150,7 @@
                
             </div>
              <div class="form-group" id="health_check_field" style="display: none;">
-                <label for="health_check_link">Health Check URL:</label>
+                <label for="health_check_link">Health Check URL(e.g: your-website.com/health.html):</label>
                 <input type="text" class="form-control" name="health_check_link">
             </div>
             <div class="form-group">
@@ -137,7 +160,7 @@
         </div>
         
         <div class="form-group" id="sticky_session_field" style="display: none;">
-            <label for="sticky_session_type">Sticky Session Type:</label>
+            <label for="sticky_session_type">Session Persistence Type:</label>
             <select class="form-control" name="sticky_session_type">
                 <option value="cookie">Cookie SERVERID</option>
                 <option value="stick-table">Stick-Table ip</option>
@@ -273,6 +296,21 @@
     // Event listener to toggle the sticky session field when checkbox is clicked
     document.getElementById('sticky_session').addEventListener('click', toggleStickySession);
 </script>
+
+ <script>
+        // Function to toggle the visibility of ACL fields based on the checkbox
+        const DosCheckbox = document.getElementById('add_dos');
+        const DosFields = document.getElementById('dos_fields');
+
+        DosCheckbox.addEventListener('change', () => {
+            if (DosCheckbox.checked) {
+                DosFields.style.display = 'block';
+            } else {
+                DosFields.style.display = 'none';
+            }
+        });
+    </script>
+    
  <script>
         // Function to toggle the visibility of ACL fields based on the checkbox
         const aclCheckbox = document.getElementById('add_acl');
