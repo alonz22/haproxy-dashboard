@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        /* Custom CSS for the header */
+        header {
+            background-color: #f2f2f2;
+            padding: 20px;
+            display: flex;
+            padding-left: 100px;
+            align-items: center;
+        }
+
+        .logo {
+            width: 300px; /* Adjust the width as needed */
+            height: auto;
+        }
+
+        .menu-link {
+            text-decoration: none;
+            padding: 10px 20px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .menu-link:hover {
+            background-color: #3B444B;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <a href="/home" style="text-decoration: none;">
+        <h3 style="color: grey; font-size: 22px;" class="logo">
+            <i style="margin: 8px;" class="fas fa-globe"></i>Haproxy Configurator
+        </h3>
+    </a>
+    <a href="/" class="menu-link">Add Frontend & Backend</a>
+    <a href="/edit" class="menu-link">Edit HAProxy Config</a>
+    <a  href="http://{{ request.host.split(':')[0] }}:8080/stats" class="menu-link" >HAProxy Stats</a>
+</header>
+
+    <div style="box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border-radius: 5px; padding: 40px;" class="container mt-5">
+        <h3 style="margin-bottom: 20px;" class="mt-4">Welcome to Your HAProxy Configurator. Here's A Short Summary:</h3>
+
+        <p class="lead"><i style="margin: 8px;" class="fas fa-globe"></i> <strong>{{ frontend_count }}</strong> frontends</p>
+        <p class="lead"><i style="margin-right: 8px;" class="fas fa-sitemap"></i> <strong>{{ backend_count }}</strong> backends</p>
+        <p class="lead"><i style="margin: 8px;" class="fas fa-user-lock"></i> <strong>{{ acl_count }}</strong> acl's</p>
+        <p class="lead"><i style="margin: 8px;" class="fas fa-code"></i> <strong>{{ layer7_count }}</strong> layer7(mode http) loadbalanced frontends</p>
+        <p class="lead"><i style="margin: 8px;" class="fas fa-network-wired"></i> <strong>{{ layer4_count }}</strong> layer4(mode tcp)loadbalanced frontends</p>
+        <div class="mt-4">
+            <a href="/" class="btn btn-primary"><i style="margin: 8px;" class="fas fa-plus"></i>Add New Frontend/Backend</a>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JS and jQuery links here (if needed) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
