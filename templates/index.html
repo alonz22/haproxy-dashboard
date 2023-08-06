@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HAProxy Configurator</title>
+    <!-- Add Bootstrap CSS link -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+   <style>
+        /* Custom CSS for the header */
+        header {
+            background-color: #f2f2f2;
+            padding: 20px;
+            display: flex;
+            padding-left: 100px;
+            align-items: center;
+        }
+
+        .logo {
+            width: 300px; /* Adjust the width as needed */
+            height: auto;
+        }
+
+        .menu-link {
+            text-decoration: none;
+            padding: 10px 20px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .menu-link:hover {
+            background-color: #3B444B;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+ <!-- Header with the Edit link as a menu -->
+ 
+    <header>
+    <a href="/" style="text-decoration: none;">
+        <h3 style="color: grey; font-size: 22px;" class="logo">
+            <i style="margin: 8px;" class="fas fa-globe"></i>Haproxy Configurator
+        </h3>
+    </a>
+    <a  href="http://{{ request.host.split(':')[0] }}:8080/stats" class="menu-link" >HAProxy Stats</a>
+    <a href="/edit" class="menu-link">Edit HAProxy Config</a>
+</header>
+
+    
+    <div class="container mt-4">
+    <div style="box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border-radius: 5px;" class="container mt-5">
+         <label style="margin: 20px auto; font-size: 18px; font-weight: bold;"><i style="margin: 8px;" class="fas fa-globe"></i> Add New Frontend:</label><br>
+        <!-- Display success message when the form is submitted successfully -->
+        {% if message %}
+      <div class="alert {% if 'already exists' in message %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endif %}
+        <form method="post" action="/">
+        
+            <div class="form-group">
+                <label for="frontend_name">Frontend Name:</label>
+                <input type="text" class="form-control" name="frontend_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="frontend_ip">Frontend IP:</label>
+                <input type="text" class="form-control" name="frontend_ip" required>
+            </div>
+
+            <div class="form-group">
+                <label for="frontend_port">Frontend Port:</label>
+                <input type="number" class="form-control" name="frontend_port" required>
+            </div>
+            <!-- Checkbox for SSL Certificate -->
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="ssl_checkbox" name="ssl_checkbox">
+                <label class="form-check-label" for="ssl_checkbox"><i style="margin: 8px;" class="fas fa-lock"></i>Use SSL Certificate</label>
+            </div>
+            <!-- Fields for SSL Certificate Path and SSL Key Path (Hidden by default) -->
+            <div class="form-group" style="display: none;" id="ssl_fields">
+                <label for="ssl_cert_path">SSL Certificate Path:</label>
+                <input type="text" id="ssl_cert_path" class="form-control" name="ssl_cert_path">
+        
+            </div>
+            <div class="form-group">
+                <label for="lb_method">Load Balancing Method:</label>
+                <select class="form-control" name="lb_method">
+                    <option value="roundrobin">Round Robin</option>
+                    <option value="leastconn">Least Connections</option>
+                    <!-- Add more load balancing methods here if needed -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="protocol">Protocol:</label>
+                <select class="form-control" name="protocol">
+                    <option value="tcp">TCP</option>
+                    <option value="http">HTTP</option>
+                    <!-- Add more protocols here if needed -->
+                </select>
+            </div>
+            <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="add_acl" id="add_acl">
+            <label style="margin-bottom: 10px;" class="form-check-label" for="add_acl"> <i style="margin: 8px;" class="fas fa-user-lock"></i> Add ACL for Frontend</label>
+        </div>
+
+        <div class="form-group" id="acl_fields" style="display: none; padding-bottom: 20px;">
+            <label for="acl">ACL:</label>
+            <input type="text" class="form-control" name="acl">
+
+            <label for="backend_name_acl">Backend Name:</label>
+            <input type="text" class="form-control" name="backend_name_acl">
+        </div>
+        
+</div>
+        <div style="box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border-radius: 5px;" class="container mt-5">
+            <div class="form-group">
+                <label style="margin-top: 40px; margin-bottom: 30px; font-size: 18px; font-weight: bold;"><i style="margin-right: 8px;" class="fas fa-sitemap"></i> Backend Servers Pool:</label><br>
+                <div class="form-group">
+                 <input type="checkbox" name="health_check" id="health_check" onclick="toggleHealthCheck()">
+                <label for="health_check"><i style="margin: 8px;" class="fas fa-heartbeat"></i> Enable Health Check <strong>(HTTP mode only)</strong></label>
+               
+            </div>
+             <div class="form-group" id="health_check_field" style="display: none;">
+                <label for="health_check_link">Health Check URL:</label>
+                <input type="text" class="form-control" name="health_check_link">
+            </div>
+            <div class="form-group">
+             <input type="checkbox" name="sticky_session" id="sticky_session" onclick="toggleStickySession()">
+            <label for="sticky_session"><i style="margin: 8px;" class="fas fa-link"></i> Enable Sticky Session</label>
+           
+        </div>
+        
+        <div class="form-group" id="sticky_session_field" style="display: none;">
+            <label for="sticky_session_type">Sticky Session Type:</label>
+            <select class="form-control" name="sticky_session_type">
+                <option value="cookie">Cookie SERVERID</option>
+                <option value="stick-table">Stick-Table ip</option>
+            </select>
+        </div>
+           
+                <label for="backend_name">Backend Name:</label>
+                <input type="text" class="form-control" name="backend_name" required>
+            </div>
+            
+            <!-- Backend Server 1 -->
+            <div id="backend_servers_container">
+            
+                <div class="form-group">
+                    <label for="backend_server1_name">Backend Server 1 Name:</label>
+                    <input type="text" class="form-control" name="backend_server_names" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="backend_server1_ip">Backend Server 1 IP:</label>
+                        <input type="text" class="form-control" name="backend_server_ips" required>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="backend_server1_port">Backend Server 1 Port:</label>
+                        <input type="number" class="form-control" name="backend_server_ports" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="backend_server2_name">Backend Server 2 Name:</label>
+                    <input type="text" class="form-control" name="backend_server_names" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="backend_server2_ip">Backend Server 2 IP:</label>
+                        <input type="text" class="form-control" name="backend_server_ips" required>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="backend_server2_port">Backend Server 2 Port:</label>
+                        <input type="number" class="form-control" name="backend_server_ports" required>
+                    </div>
+                </div>
+            </div>
+            <button style="margin: 0 auto; margin-top: 20px;" type="button" class="btn btn-primary mb-3" onclick="addBackendServerField()"><i style="margin-right: 4px;" class="fas fa-plus"></i>Add Backend Server</button>
+</div>
+            <!-- Button to add more backend server fields -->
+            
+
+            <input style="margin-bottom: 14px; margin-top: 20px;" type="submit" class="btn btn-success" value="Submit">
+        </form>
+    </div>
+
+    <!-- Add Bootstrap JS and jQuery (required for some Bootstrap components) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Function to add more backend server fields dynamically
+        let num = 3; // Start the counter from 3 for the next backend server
+        function addBackendServerField() {
+            var container = document.getElementById('backend_servers_container');
+            var div = document.createElement('div');
+
+            div.innerHTML = `
+                <div class="form-group">
+                    <label for="backend_server${num}_name">Backend Server ${num} Name:</label>
+                    <input type="text" class="form-control" name="backend_server_names" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="backend_server${num}_ip">Backend Server ${num} IP:</label>
+                        <input type="text" class="form-control" name="backend_server_ips" required>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="backend_server${num}_port">Backend Server ${num} Port:</label>
+                        <input type="number" class="form-control" name="backend_server_ports" required>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(div);
+            num++; // Increment the counter for the next backend server
+            
+        }
+        
+    </script>
+    <script>
+        // Function to hide the success message after a few seconds
+        $(document).ready(function() {
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000); // Hide the message after 3 seconds (adjust the time as needed)
+        });
+    </script>
+    
+    <script>
+    // Function to toggle the health check field based on the protocol selected
+    function toggleHealthCheck() {
+    const healthCheckField = document.getElementById('health_check_field');
+    const healthCheckCheckbox = document.getElementById('health_check');
+
+    if (healthCheckCheckbox.checked) {
+        healthCheckField.style.display = 'block';
+    } else {
+        healthCheckField.style.display = 'none';
+    }
+}
+
+    // Event listener to toggle the health check field when protocol changes
+    document.querySelector('select[name="protocol"]').addEventListener('change', toggleHealthCheck);
+</script>
+
+
+<script>
+    // Function to toggle the sticky session field based on checkbox selection
+    function toggleStickySession() {
+        const stickySessionCheckbox = document.getElementById('sticky_session');
+        const stickySessionField = document.getElementById('sticky_session_field');
+        if (stickySessionCheckbox.checked) {
+            stickySessionField.style.display = 'block';
+        } else {
+            stickySessionField.style.display = 'none';
+        }
+    }
+
+    // Event listener to toggle the sticky session field when checkbox is clicked
+    document.getElementById('sticky_session').addEventListener('click', toggleStickySession);
+</script>
+ <script>
+        // Function to toggle the visibility of ACL fields based on the checkbox
+        const aclCheckbox = document.getElementById('add_acl');
+        const aclFields = document.getElementById('acl_fields');
+
+        aclCheckbox.addEventListener('change', () => {
+            if (aclCheckbox.checked) {
+                aclFields.style.display = 'block';
+            } else {
+                aclFields.style.display = 'none';
+            }
+        });
+    </script>
+     <script>
+        document.getElementById('ssl_checkbox').addEventListener('change', function () {
+            const sslFields = document.getElementById('ssl_fields');
+            sslFields.style.display = this.checked ? 'block' : 'none';
+        });
+    </script>
+</body>
+</html>
