@@ -51,6 +51,16 @@ Launch the HAProxy Configurator by navigating to http://your-haproxy-server-ip:5
 
 Fill in the required parameters and options for your HAProxy configuration.
 
+Frontend Section:
+
+![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/f7ac8784-73cb-4de4-b74c-be6006446c79)
+
+
+backend section:
+
+![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/ac762f3a-9b5e-4999-8695-149770105696)
+
+
 Click the "Save & Check" button to validate the configuration without reloading HAProxy.
 
 Click the "Save & Reload" button to save the configuration and trigger HAProxy's reload.
