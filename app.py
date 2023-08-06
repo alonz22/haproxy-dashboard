@@ -37,7 +37,7 @@ def is_backend_exist(backend_name):
 # Function to update HAProxy config file
 
 
-def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check, health_check_link, sticky_session, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl,ssl_cert_path, https_redirect, is_dos, ban_duration, limit_requests, forward_for ):
+def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check, health_check_link, sticky_session, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl,ssl_cert_path, https_redirect, is_dos, ban_duration, limit_requests, forward_for, is_forbidden_path, forbidden_name, allowed_ip, forbidden_path ):
     
     if is_backend_exist(backend_name):
             return f"Backend {backend_name} already exists. Cannot add duplicate."
@@ -63,6 +63,12 @@ def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, 
         if is_acl:
             haproxy_cfg.write(f"    acl {acl_name}\n")
             haproxy_cfg.write(f"    use_backend {acl_backend_name} if {acl_name}\n")
+        
+        if is_forbidden_path:
+            haproxy_cfg.write(f"    acl {forbidden_name} src {allowed_ip}\n")
+            haproxy_cfg.write(f"    http-request deny if !{forbidden_name} {{ path_beg {forbidden_path} }}\n")
+
+            
         haproxy_cfg.write(f"    default_backend {backend_name}\n")
 
     with open('/etc/haproxy/haproxy.cfg', 'a') as haproxy_cfg:
@@ -108,6 +114,13 @@ def index():
         ban_duration = request.form["ban_duration"]
         limit_requests = request.form["limit_requests"]
         forward_for = 'forward_for_check' in request.form
+        
+        is_forbidden_path = 'add_acl_path' in request.form
+        forbidden_name = request.form["forbidden_name"]
+        allowed_ip = request.form["allowed_ip"]
+        forbidden_path = request.form["forbidden_path"]
+        
+        
       
         # Combine backend server info into a list of tuples (name, ip, port)
         backend_servers = zip(backend_server_names, backend_server_ips, backend_server_ports)
@@ -132,7 +145,7 @@ def index():
             sticky_session_type = request.form['sticky_session_type']
 
         # Update the HAProxy config file
-        message = update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check, health_check_link, sticky_session, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl, ssl_cert_path,https_redirect, is_dos, ban_duration, limit_requests, forward_for )
+        message = update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check, health_check_link, sticky_session, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl, ssl_cert_path,https_redirect, is_dos, ban_duration, limit_requests, forward_for , is_forbidden_path, forbidden_name, allowed_ip, forbidden_path )
         return render_template('index.html', message=message)
 
     return render_template('index.html')
