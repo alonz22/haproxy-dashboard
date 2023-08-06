@@ -37,7 +37,7 @@ def is_backend_exist(backend_name):
 # Function to update HAProxy config file
 
 
-def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check, health_check_link, sticky_session, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl,ssl_cert_path ):
+def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check, health_check_link, sticky_session, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl,ssl_cert_path, https_redirect, is_dos, ban_duration, limit_requests, forward_for ):
     
     if is_backend_exist(backend_name):
             return f"Backend {backend_name} already exists. Cannot add duplicate."
@@ -48,10 +48,18 @@ def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, 
             return "Frontend or Port already exists. Cannot add duplicate."
         haproxy_cfg.write(f"    bind {frontend_ip}:{frontend_port}")
         if use_ssl:
-            haproxy_cfg.write(f" ssl crt {ssl_cert_path}")
+            haproxy_cfg.write(f" ssl crt {ssl_cert_path}\n")
+            if https_redirect:
+                haproxy_cfg.write(f" redirect scheme https code 301 if !{{ ssl_fc }}")
         haproxy_cfg.write("\n")
+        if forward_for:
+            haproxy_cfg.write(f"    option forwardfor\n")
         haproxy_cfg.write(f"    mode {protocol}\n")
         haproxy_cfg.write(f"    balance {lb_method}\n")
+        if is_dos:
+            haproxy_cfg.write(f"    stick-table type ip size 1m expire {ban_duration} store gpc0\n")
+            haproxy_cfg.write(f"    tcp-request connection track-sc0 src\n")
+            haproxy_cfg.write(f"    tcp-request connection reject if {{ sc_http_req_rate(0) gt {str(limit_requests)} }}\n")
         if is_acl:
             haproxy_cfg.write(f"    acl {acl_name}\n")
             haproxy_cfg.write(f"    use_backend {acl_backend_name} if {acl_name}\n")
@@ -95,6 +103,11 @@ def index():
         acl_backend_name = request.form['backend_name_acl'] if 'backend_name_acl' in request.form else ''
         use_ssl = 'ssl_checkbox' in request.form
         ssl_cert_path = request.form['ssl_cert_path']
+        https_redirect = 'ssl_redirect_checkbox' in request.form
+        is_dos = 'add_dos' in request.form if 'add_dos' in request.form else ''
+        ban_duration = request.form["ban_duration"]
+        limit_requests = request.form["limit_requests"]
+        forward_for = 'forward_for_check' in request.form
       
         # Combine backend server info into a list of tuples (name, ip, port)
         backend_servers = zip(backend_server_names, backend_server_ips, backend_server_ports)
@@ -119,7 +132,7 @@ def index():
             sticky_session_type = request.form['sticky_session_type']
 
         # Update the HAProxy config file
-        message = update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check, health_check_link, sticky_session, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl, ssl_cert_path )
+        message = update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check, health_check_link, sticky_session, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl, ssl_cert_path,https_redirect, is_dos, ban_duration, limit_requests, forward_for )
         return render_template('index.html', message=message)
 
     return render_template('index.html')
