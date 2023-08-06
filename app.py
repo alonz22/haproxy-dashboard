@@ -83,10 +83,12 @@ def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, 
             if health_check:
                 haproxy_cfg.write(f"    option httpchk GET {health_check_link}\n")
         for backend_server_info in backend_servers:
-            backend_server_name, backend_server_ip, backend_server_port = backend_server_info
+            backend_server_name, backend_server_ip, backend_server_port, backend_server_maxconn = backend_server_info
             haproxy_cfg.write(f"    server {backend_server_name} {backend_server_ip}:{backend_server_port} check")
             if sticky_session and sticky_session_type == 'cookie':
                 haproxy_cfg.write(f" cookie {backend_server_name}")
+            if backend_server_maxconn:
+                haproxy_cfg.write(f" maxconn {backend_server_maxconn}")
             haproxy_cfg.write("\n")
 
     return "Frontend and Backend added successfully."
@@ -104,6 +106,7 @@ def index():
         backend_server_names = request.form.getlist('backend_server_names')
         backend_server_ips = request.form.getlist('backend_server_ips')
         backend_server_ports = request.form.getlist('backend_server_ports')
+        backend_server_maxconns = request.form.getlist('backend_server_maxconns')
         is_acl = 'add_acl' in request.form
         acl_name = request.form['acl'] if 'acl' in request.form else ''
         acl_backend_name = request.form['backend_name_acl'] if 'backend_name_acl' in request.form else ''
@@ -123,7 +126,7 @@ def index():
         
       
         # Combine backend server info into a list of tuples (name, ip, port)
-        backend_servers = zip(backend_server_names, backend_server_ips, backend_server_ports)
+        backend_servers = zip(backend_server_names, backend_server_ips, backend_server_ports, backend_server_maxconns)
 
         # Check if frontend or port already exists
         if is_frontend_exist(frontend_name, frontend_ip, frontend_port):
@@ -151,6 +154,7 @@ def index():
     return render_template('index.html')
 
 import subprocess
+
 
 @app.route('/edit', methods=['GET', 'POST'])
 def edit_haproxy_config():
@@ -192,8 +196,37 @@ def edit_haproxy_config():
 
     return render_template('edit.html', config_content=config_content)
 
+def count_frontends_and_backends():
+    frontend_count = 0
+    backend_count = 0
+    acl_count = 0
+    layer7_count = 0
+    layer4_count = 0
+    
+    with open('/etc/haproxy/haproxy.cfg', 'r') as haproxy_cfg:
+        lines = haproxy_cfg.readlines()
 
+        for line in lines:
+            line = line.strip()
 
+            if line.startswith('frontend '):
+                frontend_count += 1
+            if line.startswith('acl '):
+                acl_count += 1
+            if line.startswith('mode http'):
+                layer7_count += 1
+            if line.startswith('mode tcp'):
+                layer4_count += 1     
+            elif line.startswith('backend '):
+                backend_count += 1
+
+    return frontend_count, backend_count, acl_count, layer7_count, layer4_count
+
+@app.route('/home')
+def home():
+    frontend_count, backend_count, acl_count, layer7_count, layer4_count = count_frontends_and_backends()
+
+    return render_template('home.html', frontend_count=frontend_count, backend_count=backend_count, acl_count=acl_count ,layer7_count=layer7_count, layer4_count=layer4_count )
 
 
 if __name__ == '__main__':
