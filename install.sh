@@ -11,7 +11,7 @@ sudo cp app.py /etc/haproxy-configurator/
 # Create the service file for 'simplelb' (Assuming you want a systemd service)
 cat << EOF | sudo tee /etc/systemd/system/haproxy-configurator.service
 [Unit]
-Description=Simple Load Balancer Service By Alon Zur
+Description=HAProxy-Cofigurator Service By Alon Zur
 
 [Service]
 ExecStart=/usr/bin/python3 /etc/haproxy-configurator/app.py
@@ -26,6 +26,6 @@ EOF
 # Reload systemd to load the new service
 sudo systemctl daemon-reload
 
-# Enable and start the 'simplelb' service
+# Enable and start the 'haproxy-configurator' service
 sudo systemctl enable haproxy-configurator.service
 sudo systemctl start haproxy-configurator.service
