@@ -36,13 +36,15 @@
 </head>
 <body>
 <header>
-    <a href="/" style="text-decoration: none;">
+    <a href="/home" style="text-decoration: none;">
         <h3 style="color: grey; font-size: 22px;" class="logo">
             <i style="margin: 8px;" class="fas fa-globe"></i>Haproxy Configurator
         </h3>
     </a>
-    <a  href="http://{{ request.host.split(':')[0] }}:8080/stats" class="menu-link" target="_blank">HAProxy Stats</a>
+    <a href="/home" class="menu-link">Home</a>
     <a href="/" class="menu-link">Add Frontend & Backend</a>
+    <a  href="http://{{ request.host.split(':')[0] }}:8080/stats" class="menu-link" target="_blank">HAProxy Stats</a>
+    
 </header>
     <div style="box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border-radius: 5px;" class="container mt-5">
         <h3 style="color: grey; padding: 15px;">Edit HAProxy Config</h3>
