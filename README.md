@@ -13,23 +13,36 @@ While we strive to ensure the accuracy and correctness of the generated configur
 ## Requirements
 Before using the HAProxy Configurator, ensure that your system meets the following requirements:
 
-1.HAProxy: HAProxy must be installed on your system. The configurator relies on HAProxy to manage load balancing and proxying. Please install HAProxy using the package manager for your specific OS.
+1.A user with high privileges (sudo or root).
 
-2.Python 3: The HAProxy Configurator is implemented in Python 3. Make sure Python 3 is installed on your system to run the configurator.
+2.HAProxy: HAProxy must be installed on your system. The configurator relies on HAProxy to manage load balancing and proxying. Please install HAProxy using the package manager for your specific OS.
 
-3.Port 5000 Available: The configurator runs as a web application and listens on port 5000. Ensure that port 5000 is available and not occupied by any other process.
+3.Python 3: The HAProxy Configurator is implemented in Python 3. Make sure Python 3 is installed on your system to run the configurator.
+
+4.Port 5000 Available: The configurator runs as a web application and listens on port 5000. Ensure that port 5000 is available and not occupied by any other process.
 
 ## Install:
 
 1. clone the repository:
    ```git clone https://github.com/alonz22/HAProxy-Configurator```
+
 2. Install flask:
    ```pip install flask```
-3. got ot he root folder of the app:
+
+3. enter the root folder of the app:
    ```cd haproxy-configurator```
-4. run the app:
-   ```python3 app.py```
-5.browse the app:
+
+4. run the installation script:
+   ```chmod +x install.sh```
+   if the script failes to run with "bad interpreter" error, run the following:
+   ```sed -i 's/\r//' install.sh```
+   ```./install.sh```
+
+5. the path of the root directory of the app should be located now at ```/etc/haproxy-configurator```
+
+6. run ```service haproxy-configurator status``` to see if the servcie is running.
+
+7.browse the app:
    ```browse http://your-haproxy-server-ip:5000```
 
 ## Usage
@@ -43,7 +56,7 @@ Click the "Save & Reload" button to save the configuration and trigger HAProxy's
 
 Review the generated configuration output and verify its accuracy.
 
-Download the configuration file from the provided link and use it with your HAProxy installation.
+
 
 Feedback and Contributions
 Your feedback and suggestions for improvements are welcome! Please feel free to open issues or submit pull requests on our GitHub repository.
