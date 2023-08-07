@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, render_template_string
 import subprocess
-
+import csv
+import requests
 app = Flask(__name__)
+
 
 def is_frontend_exist(frontend_name, frontend_ip, frontend_port):
     with open('/etc/haproxy/haproxy.cfg', 'r') as haproxy_cfg:
@@ -37,7 +39,7 @@ def is_backend_exist(backend_name):
 # Function to update HAProxy config file
 
 
-def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check, health_check_link, sticky_session, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl,ssl_cert_path, https_redirect, is_dos, ban_duration, limit_requests, forward_for, is_forbidden_path, forbidden_name, allowed_ip, forbidden_path ):
+def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check,health_check_tcp, health_check_link, sticky_session,add_header, header_name,header_value, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl,ssl_cert_path, https_redirect, is_dos, ban_duration, limit_requests, forward_for, is_forbidden_path, forbidden_name, allowed_ip, forbidden_path ):
     
     if is_backend_exist(backend_name):
             return f"Backend {backend_name} already exists. Cannot add duplicate."
@@ -79,23 +81,35 @@ def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, 
         if sticky_session and sticky_session_type == 'stick-table':
             haproxy_cfg.write("    stick-table type ip size 200k expire 5m\n")
             haproxy_cfg.write("    stick on src\n")
+        if add_header:
+            haproxy_cfg.write(f"   http-request set-header {header_name} \"{header_value}\"\n")
         if protocol == 'http':
             if health_check:
                 haproxy_cfg.write(f"    option httpchk GET {health_check_link}\n")
+                haproxy_cfg.write(f"    http-check disable-on-404\n")
+                haproxy_cfg.write(f"    http-check expect string OK\n")
+        if protocol == 'tcp':
+            if health_check_tcp:
+                haproxy_cfg.write(f"    option tcp-check\n")
+                haproxy_cfg.write("    tcp-check send PING" + r"\r\n" + "\n")
+                haproxy_cfg.write("    tcp-check send QUIT" + r"\r\n" + "\n")       
         for backend_server_info in backend_servers:
             backend_server_name, backend_server_ip, backend_server_port, backend_server_maxconn = backend_server_info
-            haproxy_cfg.write(f"    server {backend_server_name} {backend_server_ip}:{backend_server_port} check")
+            if backend_server_name and backend_server_ip and backend_server_port:
+                haproxy_cfg.write(f"    server {backend_server_name} {backend_server_ip}:{backend_server_port} check")
             if sticky_session and sticky_session_type == 'cookie':
-                haproxy_cfg.write(f" cookie {backend_server_name}")
+                if backend_server_name and backend_server_ip and backend_server_port:
+                    haproxy_cfg.write(f" cookie {backend_server_name}")
             if backend_server_maxconn:
                 haproxy_cfg.write(f" maxconn {backend_server_maxconn}")
             haproxy_cfg.write("\n")
-
+    
     return "Frontend and Backend added successfully."
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    
     if request.method == 'POST':
         frontend_name = request.form['frontend_name']
         frontend_ip = request.form['frontend_ip']
@@ -103,6 +117,9 @@ def index():
         lb_method = request.form['lb_method']
         protocol = request.form['protocol']
         backend_name = request.form['backend_name']
+        add_header = 'add_header' in request.form  if 'add_header' in request.form else ''
+        header_name = request.form['header_name']
+        header_value = request.form['header_value']
         backend_server_names = request.form.getlist('backend_server_names')
         backend_server_ips = request.form.getlist('backend_server_ips')
         backend_server_ports = request.form.getlist('backend_server_ports')
@@ -125,9 +142,10 @@ def index():
         
         
       
-        # Combine backend server info into a list of tuples (name, ip, port)
+        # Combine backend server info into a list of tuples (name, ip, port, maxconns)
+        
         backend_servers = zip(backend_server_names, backend_server_ips, backend_server_ports, backend_server_maxconns)
-
+        
         # Check if frontend or port already exists
         if is_frontend_exist(frontend_name, frontend_ip, frontend_port):
             return render_template('index.html', message="Frontend or Port already exists. Cannot add duplicate.")
@@ -139,6 +157,10 @@ def index():
             health_check = 'health_check' in request.form
             if health_check:
                 health_check_link = request.form['health_check_link']
+                
+        health_check_tcp = False
+        if protocol == 'tcp':
+            health_check_tcp = 'health_check2' in request.form
 
         # Get sticky session related fields
         sticky_session = False
@@ -148,7 +170,7 @@ def index():
             sticky_session_type = request.form['sticky_session_type']
 
         # Update the HAProxy config file
-        message = update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check, health_check_link, sticky_session, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl, ssl_cert_path,https_redirect, is_dos, ban_duration, limit_requests, forward_for , is_forbidden_path, forbidden_name, allowed_ip, forbidden_path )
+        message = update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check,health_check_tcp, health_check_link, sticky_session ,add_header, header_name, header_value, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl, ssl_cert_path,https_redirect, is_dos, ban_duration, limit_requests, forward_for , is_forbidden_path, forbidden_name, allowed_ip, forbidden_path )
         return render_template('index.html', message=message)
 
     return render_template('index.html')
@@ -227,6 +249,116 @@ def home():
     frontend_count, backend_count, acl_count, layer7_count, layer4_count = count_frontends_and_backends()
 
     return render_template('home.html', frontend_count=frontend_count, backend_count=backend_count, acl_count=acl_count ,layer7_count=layer7_count, layer4_count=layer4_count )
+
+
+HAPROXY_STATS_URL = 'http://127.0.0.1:8080/;csv'
+
+def fetch_haproxy_stats():
+    try:
+        response = requests.get(HAPROXY_STATS_URL)
+        response.raise_for_status()
+        return response.text
+    except requests.exceptions.RequestException as e:
+        return str(e)
+
+def parse_haproxy_stats(stats_data):
+    data = []
+    # Remove the '#' character from the header row
+    header_row = stats_data.splitlines()[0].replace('# ', '')
+    reader = csv.DictReader(stats_data.splitlines(), fieldnames=header_row.split(','))
+    next(reader)  # Skip the header row
+    for row in reader:
+        if row['svname'] != 'BACKEND':
+            data.append({
+                'frontend_name': row['pxname'],
+                'server_name': row['svname'],
+                '4xx_errors': row['hrsp_4xx'],
+                '5xx_errors': row['hrsp_5xx'],
+                'bytes_in_mb': f'{float(row["bin"]) / (1024 * 1024):.2f}',
+                'bytes_out_mb': f'{float(row["bout"]) / (1024 * 1024):.2f}',
+                'conn_tot': row['conn_tot'],
+            })
+    return data
+    
+    
+@app.route('/statistics')
+def display_haproxy_stats():
+    haproxy_stats = fetch_haproxy_stats()
+    parsed_stats = parse_haproxy_stats(haproxy_stats)
+    return render_template_string('''
+     <style>
+        /* Custom CSS for the header */
+        header {
+            background-color: #f2f2f2;
+            padding: 20px;
+            display: flex;
+            padding-left: 100px;
+            align-items: center;
+        }
+
+        .logo {
+            width: 300px; /* Adjust the width as needed */
+            height: auto;
+        }
+
+        .menu-link {
+            text-decoration: none;
+            padding: 10px 20px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .menu-link:hover {
+            background-color: #3B444B;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+        <header>
+    <a href="/home" style="text-decoration: none;">
+        <h3 style="color: grey; font-size: 22px;" class="logo">
+            <i style="margin: 8px;" class="fas fa-globe"></i>Haproxy Configurator
+        </h3>
+    </a>
+    <a href="/home" class="menu-link">Home</a>
+    <a href="/edit" class="menu-link">Edit HAProxy Config</a>
+    <a href="http://{{ request.host.split(':')[0] }}:8080/stats" class="menu-link" >HAProxy Stats</a>
+    
+    
+</header>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <div class="container">
+            <h1 class="my-4">HAProxy Stats</h1>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Frontend Name</th>
+                            <th>Server Name</th>
+                            <th>4xx Errors</th>
+                            <th>5xx Errors</th>
+                            <th>Bytes In (MB)</th>
+                            <th>Bytes Out (MB)</th>
+                            <th>Total Connections</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in stats %}
+                        <tr>
+                            <td>{{ stat.frontend_name }}</td>
+                            <td>{{ stat.server_name }}</td>
+                            <td>{{ stat['4xx_errors'] }}</td>
+                            <td>{{ stat['5xx_errors'] }}</td>
+                            <td>{{ stat.bytes_in_mb }}</td>
+                            <td>{{ stat.bytes_out_mb }}</td>
+                            <td>{{ stat.conn_tot }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    ''', stats=parsed_stats)
 
 
 if __name__ == '__main__':
