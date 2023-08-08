@@ -63,27 +63,31 @@
             </button>
         </div>
     {% endif %}
+  
         <form method="post" action="/">
         
-            <div class="form-group">
+          <div class="form-row">
+            <div class="form-group col-md-4">
                 <label for="frontend_name">Frontend Name:</label>
                 <input type="text" class="form-control" name="frontend_name" required>
             </div>
 
-            <div class="form-group">
+            <div class="form-group col-md-4">
                 <label for="frontend_ip">Frontend IP:</label>
                 <input type="text" class="form-control" name="frontend_ip" required>
             </div>
 
-            <div class="form-group">
+            <div class="form-group col-md-3">
                 <label for="frontend_port">Frontend Port:</label>
                 <input type="number" class="form-control" name="frontend_port" required>
             </div>
+        </div>
             <!-- Checkbox for SSL Certificate -->
             <div class="form-check">
                 <input type="checkbox" class="form-check-input" id="ssl_checkbox" name="ssl_checkbox">
                 <label class="form-check-label" for="ssl_checkbox"><i style="margin: 8px;" class="fas fa-lock"></i>Use SSL Certificate</label>
             </div>
+            
             <!-- Fields for SSL Certificate Path and SSL Key Path (Hidden by default) -->
             <div class="form-group" style="display: none;" id="ssl_fields">
                 <label for="ssl_cert_path">SSL Certificate Path:</label>
@@ -94,7 +98,7 @@
             </div>
             </div>
             
-             
+            
             <div style="margin-top: 15px;" class="form-group">
                 <label for="lb_method">Load Balancing Method:</label>
                 <select class="form-control" name="lb_method">
@@ -117,6 +121,8 @@
                   <!-- Add more protocols here if needed -->
               </select>
           </div>
+          
+          <!-- DOS -->
             <div class="form-check">
             <input type="checkbox" class="form-check-input" name="add_dos" id="add_dos">
             <label style="margin-bottom: 10px;" class="form-check-label" for="add_acl"><i style="margin: 8px;" class="fas fa-shield-alt"></i> Add DOS Protection</label>
@@ -131,21 +137,55 @@
             <input type="text" class="form-control" name="ban_duration">
         </div>
         
-            <div class="form-check">
+        <!-- DOS -->
+        
+         <!-- SQL Injection -->
+        
+        <div style="margin-top: 8px; padding-bottom: 15px; display: none;" class="form-check" id="sql_injection_container" onchange="toggleSqlInjection()">
+             
+                <input type="checkbox" class="form-check-input" id="sql_injection_check" name="sql_injection_check">
+                <label class="form-check-label" for="sql_injection_check"><i style="margin: 8px;"   <i style="margin: 8px;" class="fas fa-shield-alt"></i>Activate SQL Injection Protection</label>
+          
+            </div>
+        <!-- SQL Injection -->
+        
+        <!-- XSS -->
+        
+        <div style="margin-top: 8px; padding-bottom: 15px; display: none;" class="form-check" id="XSS_container" onchange="toggleXSS()">
+             
+                <input type="checkbox" class="form-check-input" id="xss_check" name="xss_check">
+                <label class="form-check-label" for="xss_check"><i style="margin: 8px;"   <i style="margin: 8px;" class="fas fa-shield-alt"></i>Activate XSS Protection</label>
+          
+            </div>
+        <!-- XSS -->
+        
+        <!-- Remote File Uploads -->
+        
+        <div style="margin-top: 8px; padding-bottom: 15px; display: none;" class="form-check" id="remote_uploads_container" onchange="RemoteUploads()">
+             
+                <input type="checkbox" class="form-check-input" id="remote_uploads_check" name="remote_uploads_check">
+                <label class="form-check-label" for="remote_uploads_check"><i style="margin: 8px;"   <i style="margin: 8px;" class="fas fa-shield-alt"></i>Activate Remote File Upload Protection</label>
+          
+            </div>
+        <!-- Remote File Uploads -->
+        
+            <div class="form-check" style="margin-top: 8px;">
             <input type="checkbox" class="form-check-input" name="add_acl" id="add_acl">
             <label style="margin-bottom: 10px;" class="form-check-label" for="add_acl"> <i style="margin: 8px;" class="fas fa-user-lock"></i> Add ACL for Frontend</label>
         </div>
 
         <div class="form-group" id="acl_fields" style="display: none; padding-bottom: 20px;">
             <label for="acl">ACL:</label>
-            <input type="text" class="form-control" name="acl">
+            <input type="text" class="form-control" name="acl" placeholder="example: acl_name">
+            <label for="acl">ACL Action:</label>
+            <input type="text" class="form-control" name="acl_action" placeholder="example: hdr(host) -i test.com">
 
             <label for="backend_name_acl">Backend Name:</label>
-            <input type="text" class="form-control" name="backend_name_acl">
+            <input type="text" class="form-control" name="backend_name_acl" placeholder="example: somebackend ">
         </div>
         
         
-         <div class="form-check">
+         <div class="form-check" id="forbidden_acl_container" class="forbidden_acl_container" onchange="toggleForbiddenCheck()" style="display: none; margin-top: 8px;">
             <input type="checkbox" class="form-check-input" name="add_acl_path" id="add_acl_path">
             <label style="margin-bottom: 10px;" class="form-check-label" for="add_acl_path"> <i style="margin: 8px;" class="fas fa-ban"></i> Block Sensitive Path</label>
         </div>
@@ -164,12 +204,33 @@
         </div>
         
         
-        
-        <div style="margin-top: 8px; padding-bottom: 15px;" class="form-check">
-                <input type="checkbox" class="form-check-input" id="forward_for_check" name="forward_for_check">
-                <label class="form-check-label" for="forward_for_check"><i style="margin: 8px;" class="fas fa-network-wired"></i>Use option forwardfor</label>
-            </div>
+        <div class="form-check" id="path_based_container" class="path_based_container" onchange="PathBasedToggle()" style="display: none; margin-top: 8px;">
+            <input type="checkbox" class="form-check-input" name="add_path_based" id="add_path_based">
+            <label style="margin-bottom: 10px;" class="form-check-label" for="add_path_based"> <i style="margin: 8px;" class="fa-arrow-circle-right"></i>Add Path Based Redirect</label>
+        </div>
+
+        <div class="form-group" id="base_redirect_fields" style="display: none; padding-bottom: 20px;">
+            <label for="forbidden_name">Domain to be redirected:</label>
+            <input type="text" class="form-control" name="redirect_domain_name" id="redirect_domain_name" placeholder="e.g: test2.com or test2.com:8888 (port matters incase of unusual ports)">
             
+            <label for="root_redirect">Root Path To Be Redirected:</label>
+            <input type="text" class="form-control" name="root_redirect" placeholder="e.g: /">
+        
+            <label for="redirect_to">Redirect To Path:</label>
+            <input type="text" class="form-control" name="redirect_to" placeholder="e.g: /test **this will redirect test2.com/ to test2.com/test**">
+
+            
+        </div>
+        
+        
+        
+        <div style="margin-top: 8px; padding-bottom: 15px;" class="form-check" id="forward_for_container" onchange="toggleForwardFor()" style="display: none; margin-top: 8px;">
+                <input type="checkbox" class="form-check-input" id="forward_for_check" name="forward_for_check">
+                <label class="form-check-label" for="forward_for_check"><i style="margin: 8px;"  <i style="margin: 8px;" class="fas fa-network-wired"></i>Use option forwardfor</label>
+            </div>
+         
+            
+
 </div>
         <div style="box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border-radius: 5px; padding: 20px;" class="container mt-5">
             <div class="form-group">
@@ -236,10 +297,10 @@
             <label for="header_field"><i style="margin: 8px;" class="fas fa-reply"></i> Add Custom Header</label>
         </div>
               <div class="form-group" id="header_field" style="display: none;">
-                <label for="header_name">Header Value(e.g: X-Clinet-IP):</label>
-                <input type="text" class="form-control" name="header_name">
-                <label for="header_value">Header Value(e.g: headervalue):</label>
-                <input type="text" class="form-control" name="header_value">
+                <label for="header_name">Header Name:</label>
+                <input type="text" class="form-control" name="header_name" placeholder="e.g: X-Clinet-IP">
+                <label for="header_value">Header Value:</label>
+                <input type="text" class="form-control" name="header_value" placeholder="e.g: test">
             </div>
             
            <!--Add header -->
@@ -501,6 +562,165 @@ document.getElementById('protocol').addEventListener('change', toggleHealthCheck
             }
         });
     </script>
+    
+     <script>
+    function toggleSqlInjection() {
+    const protocolSelect5 = document.getElementById('protocol');
+    const SqlInjectionContainer = document.getElementById('sql_injection_container');
+
+
+    
+ 
+    if (protocolSelect5.value === 'http') {
+        
+        SqlInjectionContainer.style.display = 'block';
+        
+        } 
+        
+        else {
+        SqlInjectionContainer.style.display = 'none';
+        }
+    
+}
+
+document.getElementById('protocol').addEventListener('change', toggleSqlInjection);
+</script>
+
+ <script>
+    function RemoteUploads() {
+    const protocolSelect7 = document.getElementById('protocol');
+    const RemoteUploadsContainer = document.getElementById('remote_uploads_container');
+
+
+    
+ 
+    if (protocolSelect7.value === 'http') {
+        
+        RemoteUploadsContainer.style.display = 'block';
+        
+        } 
+        
+        else {
+        RemoteUploadsContainer.style.display = 'none';
+        }
+    
+}
+
+document.getElementById('protocol').addEventListener('change', RemoteUploads);
+</script>
+
+
+ <script>
+    function toggleXSS() {
+    const protocolSelect6 = document.getElementById('protocol');
+    const XSSContainer = document.getElementById('XSS_container');
+
+
+    
+ 
+    if (protocolSelect6.value === 'http') {
+        
+        XSSContainer.style.display = 'block';
+        
+        } 
+        
+        else {
+        XSSContainer.style.display = 'none';
+        }
+    
+}
+
+document.getElementById('protocol').addEventListener('change', toggleXSS);
+</script>
+    
+    
+    
+        <script>
+    function toggleForwardFor() {
+    const protocolSelect4 = document.getElementById('protocol');
+    const ForwardForContainer = document.getElementById('forward_for_container');
+
+
+    
+ 
+    if (protocolSelect4.value === 'http') {
+        
+        ForwardForContainer.style.display = 'block';
+        
+        } 
+        
+        else {
+        ForwardForContainer.style.display = 'none';
+        }
+    
+}
+
+document.getElementById('protocol').addEventListener('change', toggleForwardFor);
+</script>
+    
+    <script>
+    function toggleForbiddenCheck() {
+    const protocolSelect3 = document.getElementById('protocol');
+    const forbiddenContainer = document.getElementById('forbidden_acl_container');
+
+
+    
+ 
+    if (protocolSelect3.value === 'http') {
+        
+        forbiddenContainer.style.display = 'block';
+        
+        } 
+        
+        else {
+        forbiddenContainer.style.display = 'none';
+        }
+    
+}
+
+document.getElementById('protocol').addEventListener('change', toggleForbiddenCheck);
+</script>
+
+
+<script>
+    function PathBasedToggle() {
+    const protocolSelect7 = document.getElementById('protocol');
+    const path_based_container = document.getElementById('path_based_container');
+
+
+    
+ 
+    if (protocolSelect7.value === 'http') {
+        
+        path_based_container.style.display = 'block';
+        
+        } 
+        
+        else {
+        path_based_container.style.display = 'none';
+        }
+    
+}
+
+document.getElementById('protocol').addEventListener('change', PathBasedToggle);
+</script>
+    
+    
+    
+    <script>
+        // Function to toggle the visibility of based path redirect fields based on the checkbox
+        const add_path_based_checkbox = document.getElementById('add_path_based');
+        const redirect_path_fields = document.getElementById('base_redirect_fields');
+
+        add_path_based_checkbox.addEventListener('change', () => {
+            if (add_path_based_checkbox.checked) {
+                redirect_path_fields.style.display = 'block';
+            } else {
+                redirect_path_fields.style.display = 'none';
+            }
+        });
+    </script>
+    
     
      <script>
         // Function to toggle the visibility of ACL forbidden paths fields based on the checkbox
