@@ -68,6 +68,10 @@
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <pre class="mt-3">{{ check_output }}</pre>
             </div>
+        {% elif 'error detected while parsing an' in check_output %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <pre class="mt-3">{{ check_output }}</pre>
+            </div>
         {% else %}
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <pre class="mt-3">{{ check_output }}</pre>
