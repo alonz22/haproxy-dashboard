@@ -39,7 +39,7 @@ def is_backend_exist(backend_name):
 # Function to update HAProxy config file
 
 
-def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check,health_check_tcp, health_check_link, sticky_session,add_header, header_name,header_value, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl,ssl_cert_path, https_redirect, is_dos, ban_duration, limit_requests, forward_for, is_forbidden_path, forbidden_name, allowed_ip, forbidden_path ):
+def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check,health_check_tcp, health_check_link, sticky_session,add_header, header_name,header_value, sticky_session_type, is_acl, acl_name,acl_action, acl_backend_name, use_ssl,ssl_cert_path, https_redirect, is_dos, ban_duration, limit_requests, forward_for, is_forbidden_path, forbidden_name, allowed_ip, forbidden_path, sql_injection_check, is_xss, is_remote_upload, add_path_based, redirect_domain_name, root_redirect, redirect_to ):
     
     if is_backend_exist(backend_name):
             return f"Backend {backend_name} already exists. Cannot add duplicate."
@@ -59,17 +59,38 @@ def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, 
         haproxy_cfg.write(f"    mode {protocol}\n")
         haproxy_cfg.write(f"    balance {lb_method}\n")
         if is_dos:
-            haproxy_cfg.write(f"    stick-table type ip size 1m expire {ban_duration} store gpc0\n")
-            haproxy_cfg.write(f"    tcp-request connection track-sc0 src\n")
-            haproxy_cfg.write(f"    tcp-request connection reject if {{ sc_http_req_rate(0) gt {str(limit_requests)} }}\n")
+            haproxy_cfg.write(f"    stick-table type ip size 1m expire {ban_duration} store http_req_rate(1m)\n")
+            haproxy_cfg.write(f"    http-request track-sc0 src\n")
+            haproxy_cfg.write(f"    acl abuse sc_http_req_rate(0) gt {limit_requests}\n")
+            haproxy_cfg.write(f"    http-request silent-drop if abuse\n")
+        if sql_injection_check:
+            haproxy_cfg.write(f"    acl is_sql_injection urlp_reg -i (union|select|insert|update|delete|drop|@@|1=1|`1)\n")
+            haproxy_cfg.write(f"    acl is_long_uri path_len gt 400\n")
+            haproxy_cfg.write(f"    acl semicolon_path path_reg -i ^.*;.*\n")
+            haproxy_cfg.write(f"    acl is_sql_injection2 urlp_reg -i (;|substring|extract|union\s+all|order\s+by)\s+(\d+|--\+)\n")
+            haproxy_cfg.write(f"    http-request deny if is_sql_injection or is_long_uri or semicolon_path or is_sql_injection2\n")
+        if is_xss:
+            haproxy_cfg.write(f"    acl is_xss_attack urlp_reg -i (<|>|script|alert|onerror|onload|javascript)\n")
+            haproxy_cfg.write(f"    acl is_xss_attack_2 urlp_reg -i (<\s*script\s*|javascript:|<\s*img\s*src\s*=|<\s*a\s*href\s*=|<\s*iframe\s*src\s*=|\bon\w+\s*=|<\s*input\s*[^>]*\s*value\s*=|<\s*form\s*action\s*=|<\s*svg\s*on\w+\s*=)\n")
+            haproxy_cfg.write(f"    acl is_xss_attack_hdr hdr_reg(Cookie|Referer|User-Agent) -i (<|>|script|alert|onerror|onload|javascript)\n")
+            haproxy_cfg.write("     acl is_xss_cookie hdr_beg(Cookie) -i \"<script\" \"javascript:\" \"on\" \"alert(\" \"iframe\" \"onload\" \"onerror\" \"onclick\" \"onmouseover\"\n")
+
+            haproxy_cfg.write(f"    http-request deny if is_xss_attack or is_xss_attack_hdr or is_xss_attack_2 or is_xss_cookie\n")
+        if is_remote_upload:
+            haproxy_cfg.write(f"    acl is_put_request method PUT\n")
+            haproxy_cfg.write(f"    http-request deny if is_put_request\n")
         if is_acl:
-            haproxy_cfg.write(f"    acl {acl_name}\n")
+            haproxy_cfg.write(f"    acl {acl_name} {acl_action}\n")
             haproxy_cfg.write(f"    use_backend {acl_backend_name} if {acl_name}\n")
         
         if is_forbidden_path:
             haproxy_cfg.write(f"    acl {forbidden_name} src {allowed_ip}\n")
             haproxy_cfg.write(f"    http-request deny if !{forbidden_name} {{ path_beg {forbidden_path} }}\n")
-
+        
+        if add_path_based:
+            haproxy_cfg.write(f"    acl is_test_com hdr(host) -i {redirect_domain_name}\n")
+            haproxy_cfg.write(f"    acl is_root path {root_redirect}\n")
+            haproxy_cfg.write(f"    http-request redirect location {redirect_to} if is_test_com or is_root\n")
             
         haproxy_cfg.write(f"    default_backend {backend_name}\n")
 
@@ -126,6 +147,7 @@ def index():
         backend_server_maxconns = request.form.getlist('backend_server_maxconns')
         is_acl = 'add_acl' in request.form
         acl_name = request.form['acl'] if 'acl' in request.form else ''
+        acl_action = request.form['acl_action'] if 'acl_action' in request.form else ''
         acl_backend_name = request.form['backend_name_acl'] if 'backend_name_acl' in request.form else ''
         use_ssl = 'ssl_checkbox' in request.form
         ssl_cert_path = request.form['ssl_cert_path']
@@ -140,7 +162,16 @@ def index():
         allowed_ip = request.form["allowed_ip"]
         forbidden_path = request.form["forbidden_path"]
         
+
+        sql_injection_check = 'sql_injection_check' in request.form if 'sql_injection_check' in request.form else ''
+        is_xss = 'xss_check' in request.form if 'xss_check' in request.form else ''
+        is_remote_upload = 'remote_uploads_check' in request.form if 'remote_uploads_check' in request.form else ''
         
+        
+        add_path_based = 'add_path_based' in request.form
+        redirect_domain_name = request.form["redirect_domain_name"]
+        root_redirect = request.form["root_redirect"]
+        redirect_to = request.form["redirect_to"]
       
         # Combine backend server info into a list of tuples (name, ip, port, maxconns)
         
@@ -170,7 +201,7 @@ def index():
             sticky_session_type = request.form['sticky_session_type']
 
         # Update the HAProxy config file
-        message = update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check,health_check_tcp, health_check_link, sticky_session ,add_header, header_name, header_value, sticky_session_type, is_acl, acl_name, acl_backend_name, use_ssl, ssl_cert_path,https_redirect, is_dos, ban_duration, limit_requests, forward_for , is_forbidden_path, forbidden_name, allowed_ip, forbidden_path )
+        message = update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check,health_check_tcp, health_check_link, sticky_session ,add_header, header_name, header_value, sticky_session_type, is_acl, acl_name,acl_action, acl_backend_name, use_ssl, ssl_cert_path,https_redirect, is_dos, ban_duration, limit_requests, forward_for , is_forbidden_path, forbidden_name, allowed_ip, forbidden_path, sql_injection_check, is_xss, is_remote_upload, add_path_based, redirect_domain_name, root_redirect, redirect_to )
         return render_template('index.html', message=message)
 
     return render_template('index.html')
@@ -207,8 +238,9 @@ def edit_haproxy_config():
                 check_output += f"\n\nError occurred:\n{error_message}"
             else:
                 # If no error, run haproxy -D -f to reload HAProxy
-                reload_result = subprocess.run(['haproxy', '-D', '-f', '/etc/haproxy/haproxy.cfg'], capture_output=True, text=True)
-                check_output += f"\n\nHAProxy Reload Output:\n{reload_result.stdout}"
+                #reload_result = subprocess.run(['haproxy', '-D', '-f', '/etc/haproxy/haproxy.cfg'], capture_output=True, text=True)
+                reload_result = subprocess.run(['systemctl', 'restart', 'haproxy', '/etc/haproxy/haproxy.cfg'], capture_output=True, text=True)
+                check_output += f"\n\nHAProxy Restart Output:\n{reload_result.stdout}"
 
         return render_template('edit.html', config_content=edited_config, check_output=check_output)
 
