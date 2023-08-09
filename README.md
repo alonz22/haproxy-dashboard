@@ -106,12 +106,18 @@ Enhance security with integrated Web Application Firewall (WAF) features:
 
 * Defend against DOS attacks
 * Mitigate SQL injection
-Prevent Cross-Site Scripting (XSS)
-Block access to sensitive paths
-Stop remote file uploads
-Add custom response headers
-Security Event Logs Analysis
-Analyze security event logs directly from the app. Gain visibility into potential threats and anomalies, empowering you to take proactive measures.
+* Prevent Cross-Site Scripting (XSS)
+* Block access to sensitive paths
+* Stop remote file uploads
+* Add custom response headers
+* Security Event Logs Analysis
+* Analyze security event logs directly from the app. Gain visibility into potential threats and anomalies, empowering you to take proactive measures.
+* Add path based redirects on Layer7 LoadBalancing (http mode)
+* Use SSL Certificate for your frontend and enable redirect to https
+* Add forwardfor to your backend, to forward the real client ip address to your backend servers
+* Enable Layer4 & Layer7 Healthchecks to your backend servers
+* Add Session Persistence to your backend servers by using client ip or a cookie.
+  
 
 Homepage Summary
 Get an overview of your entire configuration on the homepage:
