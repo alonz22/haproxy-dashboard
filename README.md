@@ -103,7 +103,7 @@ Monitor traffic distribution across your frontends and backends. Gain insights i
 
 WAF and Security
 Enhance security with integrated Web Application Firewall (WAF) features:
-
+```
 * Defend against DOS attacks
 * Mitigate SQL injection
 * Prevent Cross-Site Scripting (XSS)
@@ -117,8 +117,7 @@ Enhance security with integrated Web Application Firewall (WAF) features:
 * Add forwardfor to your backend, to forward the real client ip address to your backend servers
 * Enable Layer4 & Layer7 Healthchecks to your backend servers
 * Add Session Persistence to your backend servers by using client ip or a cookie.
-  
-
+```
 Homepage Summary
 Get an overview of your entire configuration on the homepage:
 
@@ -126,6 +125,29 @@ Count ACLs, frontends, and backends
 View load balancing methods in use
 Quick access to critical configuration details
 
+
+## Roadmap Overview
+### Phase 1: User Experience Enhancements
+1.Dark Mode: Introduce a sleek and comfortable dark mode interface, providing an alternative visual style for users who prefer reduced screen brightness during prolonged usage.
+
+### Phase 2: Performance and Flexibility
+
+1.HTTP Keep-Alive Option: Implement an option to enable HTTP Keep-Alive within the frontend configurations. This feature enhances connection efficiency by allowing multiple requests and responses to be sent over a single TCP connection.
+
+2.Backup Servers for Backend: Enhance backend resilience by adding support for specifying backup servers. These servers will be used when the primary servers are unavailable, improving overall service availability.
+
+3.Dynamic Backend Server Addition: Introduce an intuitive button to dynamically add backend servers directly from the GUI, eliminating the need to manually edit configuration files.
+
+### Phase 3: Optimizations and Security
+
+1.Frontend Caching Mechanism: Implement a frontend caching mechanism to optimize content delivery and reduce backend load. This feature will help accelerate user experiences and decrease response times.
+
+2.Advanced WAF Protection: Bolster our existing WAF features with a more robust and comprehensive set of protections against emerging threats. Enhancements will include:
+
+* Advanced SQL injection detection and prevention
+* Enhanced XSS attack mitigation
+* Fine-grained controls for blocking sensitive data leaks
+* Improved anomaly detection for DOS attacks
 
 Feedback and Contributions
 Your feedback and suggestions for improvements are welcome! Please feel free to open issues or submit pull requests on our GitHub repository.
