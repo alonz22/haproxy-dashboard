@@ -68,7 +68,7 @@ Before using the HAProxy Configurator, ensure that your system meets the followi
 The application comes with a self signed certificate related to tthe domain "haproxy-configurator.local". The path to the PEM file can be changed inside ssl.ini configuration file.
 
 ## Usage
-Launch the HAProxy Configurator by navigating to http://your-haproxy-server-ip:5000.
+Launch the HAProxy Configurator by navigating to https://your-haproxy-server-ip:5000.
 
 Fill in the required parameters and options for your HAProxy configuration.
 
