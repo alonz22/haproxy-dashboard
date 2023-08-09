@@ -11,6 +11,9 @@
 [![Version](https://img.shields.io/badge/version-1.3.1-brightgreen.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+
+
+
 ## HAProxy Configurator
 Disclaimer
 This HAProxy Configurator is a tool to assist in generating configurations for HAProxy, a powerful and widely used open-source load balancer and proxy server. It is intended to simplify the process of creating HAProxy configurations for specific use cases.
