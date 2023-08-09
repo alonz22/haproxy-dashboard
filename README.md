@@ -1,4 +1,5 @@
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![My HAProxy Configurator Badge](https://example.com/path/to/your/badge.png)](https://github.com/alonz22/HAProxy-Configurator)
+
 [![Version](https://img.shields.io/badge/version-1.3.1-brightgreen.svg)](CHANGELOG.md)
 [![Build Status](https://img.shields.io/travis/username/repo.svg)](https://travis-ci.org/username/repo)
 
