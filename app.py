@@ -470,6 +470,11 @@ def parse_log_file(log_file_path):
                     else:
                         put_method = ''
                     
+                    if "admin" in line:
+                        illegal_resource = 'Possible Illegal Resource Access Attempt Was Made.'
+                    else:
+                        illegal_resource = ''
+                    
                     parsed_entries.append({
                         'timestamp': timestamp,
                         'ip_address': ip_address,
@@ -477,7 +482,9 @@ def parse_log_file(log_file_path):
                         'requested_url': requested_url,
                         'xss_alert': xss_alert,
                         'sql_alert': sql_alert,
-                        'put_method': put_method
+                        'put_method': put_method,
+                        'illegal_resource': illegal_resource
+                        
                     })
     return parsed_entries
 
