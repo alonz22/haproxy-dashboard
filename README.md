@@ -104,8 +104,8 @@ Monitor traffic distribution across your frontends and backends. Gain insights i
 WAF and Security
 Enhance security with integrated Web Application Firewall (WAF) features:
 
-Defend against DOS attacks
-Mitigate SQL injection
+* Defend against DOS attacks
+* Mitigate SQL injection
 Prevent Cross-Site Scripting (XSS)
 Block access to sensitive paths
 Stop remote file uploads
