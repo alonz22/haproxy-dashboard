@@ -46,6 +46,10 @@ Before using the HAProxy Configurator, ensure that your system meets the followi
 7.browse the app:
    ```browse http://your-haproxy-server-ip:5000```
 
+## SSL Certificate
+
+The application comes with a self signed certificate related to tthe domain "haproxy-configurator.local". The path to the PEM file can be changed inside ssl.ini configuration file.
+
 ## Usage
 Launch the HAProxy Configurator by navigating to http://your-haproxy-server-ip:5000.
 
@@ -71,6 +75,43 @@ Click the "Save & Reload" button to save the configuration and trigger HAProxy's
 
 Review the generated configuration output and verify its accuracy.
 
+
+## features
+Table of Contents
+
+Frontend and Backend Configuration
+Easily add and manage frontend and backend configurations through our intuitive GUI. Define your load balancing, SSL termination, and ACL rules with just a few clicks.
+
+Direct Edit of haproxy.cfg
+Edit your HAProxy configuration file directly from the GUI. Make quick modifications, add custom settings, and see changes in real-time.
+
+Configuration Validation
+Ensure the accuracy of your HAProxy configuration by validating it for errors. Receive clear feedback and suggestions for improvements before applying changes.
+
+Save and Restart HAProxy Service
+With the click of a button, save your configuration changes and smoothly restart the HAProxy service, ensuring uninterrupted traffic flow.
+
+Traffic Statistics
+Monitor traffic distribution across your frontends and backends. Gain insights into usage patterns and identify performance bottlenecks.
+
+WAF and Security
+Enhance security with integrated Web Application Firewall (WAF) features:
+
+Defend against DOS attacks
+Mitigate SQL injection
+Prevent Cross-Site Scripting (XSS)
+Block access to sensitive paths
+Stop remote file uploads
+Add custom response headers
+Security Event Logs Analysis
+Analyze security event logs directly from the app. Gain visibility into potential threats and anomalies, empowering you to take proactive measures.
+
+Homepage Summary
+Get an overview of your entire configuration on the homepage:
+
+Count ACLs, frontends, and backends
+View load balancing methods in use
+Quick access to critical configuration details
 
 
 Feedback and Contributions
