@@ -57,16 +57,19 @@ Fill in the required parameters and options for your HAProxy configuration.
 
 ### Frontend Section:
 
-![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/f7ac8784-73cb-4de4-b74c-be6006446c79)
+![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/04413c22-c947-4599-9659-e0274730f061)
+
 
 
 ### backend section:
 
-![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/ac762f3a-9b5e-4999-8695-149770105696)
+![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/6af98d59-734a-4272-84aa-87c47123017a)
+
 
 ### You may as well edit the config file itself via "Edit HAProxy Config":
 
-![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/25efee56-d9b2-4c9c-a417-6c1218486a52)
+![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/c61ed725-37a4-4ad5-908f-6164311c7fd4)
+
 
 
 Click the "Save & Check" button to validate the configuration without reloading HAProxy.
@@ -75,9 +78,13 @@ Click the "Save & Reload" button to save the configuration and trigger HAProxy's
 
 Review the generated configuration output and verify its accuracy.
 
+## Review And Analize Security Events Related To Triggered ACL's Activated:
 
-## features
-Table of Contents
+![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/ce0fc97e-0622-4fab-92f1-dd71fdb3e1ba)
+
+
+
+## Features
 
 Frontend and Backend Configuration
 Easily add and manage frontend and backend configurations through our intuitive GUI. Define your load balancing, SSL termination, and ACL rules with just a few clicks.
