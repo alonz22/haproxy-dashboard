@@ -94,7 +94,7 @@ Click the "Save & Reload" button to save the configuration and trigger HAProxy's
 
 Review the generated configuration output and verify its accuracy.
 
-## Review And Analize Security Events Related To Triggered ACL's Activated:
+## Review And Analyze Security Events Related To Triggered ACL's Activated:
 
 ![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/ce0fc97e-0622-4fab-92f1-dd71fdb3e1ba)
 
