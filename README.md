@@ -1,3 +1,4 @@
+![Pull Requests](https://img.shields.io/github/issues-pr/alonz22/repo.svg)
 
 
 [![Version](https://img.shields.io/badge/version-1.3.1-brightgreen.svg)](CHANGELOG.md)
