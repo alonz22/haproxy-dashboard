@@ -104,6 +104,14 @@
                     </div>
                 {% endif %}
                 
+                <!-- Illegal Resource Access -->
+                {% if entry['webshell_alert'] %}
+                    <p class="collapse-trigger" data-bs-toggle="collapse" data-bs-target="#putMethodCollapse{{ loop.index }}">WebShell Attack Alert <span class="text-danger">(Click to show details)</span></p>
+                    <div id="putMethodCollapse{{ loop.index }}" class="collapse">
+                        <p style="color: red"><strong>{{ entry['webshell_alert'] }}</strong></p>
+                    </div>
+                {% endif %}
+                
                 <p><strong>Status Code:</strong> 403</p>
             </div>
         {% endfor %}
