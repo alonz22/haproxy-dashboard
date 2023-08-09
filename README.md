@@ -1,11 +1,12 @@
 ![Contributors](https://img.shields.io/github/contributors/alonz22/HAProxy-Configurator.svg)
 ![GitHub Stars](https://img.shields.io/github/stars/alonz22/HAProxy-Configurator.svg?style=social)
+![GitHub Forks](https://img.shields.io/github/forks/alonz22/HAProxy-Configurator.svg?style=social)
 ![Downloads](https://img.shields.io/github/downloads/alonz22/HAProxy-Configurator/total.svg)
 ![Last Commit](https://img.shields.io/github/last-commit/alonz22/HAProxy-Configurator.svg)
 ![Issues](https://img.shields.io/github/issues/alonz22/HAProxy-Configurator.svg)
 ![Pull Requests](https://img.shields.io/github/issues-pr/alonz22/HAProxy-Configurator.svg)
-![GitHub Forks](https://img.shields.io/github/forks/alonz22/HAProxy-Configurator.svg?style=social)
-![GitHub Stars](https://img.shields.io/github/stars/alonz22/HAProxy-Configurator.svg?style=social)
+
+
 
 [![Version](https://img.shields.io/badge/version-1.3.1-brightgreen.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
