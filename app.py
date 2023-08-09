@@ -530,7 +530,7 @@ def display_logs():
     return render_template('logs.html', entries=parsed_entries)
 
 config2 = configparser.ConfigParser()
-config2.read('ssl.ini')
+config2.read('/etc/haproxy-configurator/ssl.ini')
 
 certificate_path = config2.get('ssl', 'certificate_path')
 private_key_path = config2.get('ssl', 'private_key_path')
