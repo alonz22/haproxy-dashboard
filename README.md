@@ -103,7 +103,7 @@ Monitor traffic distribution across your frontends and backends. Gain insights i
 
 WAF and Security
 Enhance security with integrated Web Application Firewall (WAF) features:
-```
+
 * Defend against DOS attacks
 * Mitigate SQL injection
 * Prevent Cross-Site Scripting (XSS)
@@ -117,7 +117,7 @@ Enhance security with integrated Web Application Firewall (WAF) features:
 * Add forwardfor to your backend, to forward the real client ip address to your backend servers
 * Enable Layer4 & Layer7 Healthchecks to your backend servers
 * Add Session Persistence to your backend servers by using client ip or a cookie.
-```
+
 Homepage Summary
 Get an overview of your entire configuration on the homepage:
 
