@@ -4,7 +4,12 @@ import subprocess
 import csv
 import requests
 import re
+from OpenSSL import SSL
+import configparser
 app = Flask(__name__)
+
+
+
 
 
 def is_frontend_exist(frontend_name, frontend_ip, frontend_port):
@@ -127,6 +132,9 @@ def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, 
             haproxy_cfg.write("\n")
     
     return "Frontend and Backend added successfully."
+
+
+
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -354,7 +362,10 @@ def display_haproxy_stats():
         </h3>
     </a>
     <a href="/home" class="menu-link">Home</a>
+    <a href="/" class="menu-link">Add Frontend&Backend</a>
     <a href="/edit" class="menu-link">Edit HAProxy Config</a>
+    <a href="/logs" class="menu-link">Security Events</a>
+    <a href="/statistics" class="menu-link">Statictics</a>
     <a href="http://{{ request.host.split(':')[0] }}:8080/stats" class="menu-link" >HAProxy Stats</a>
     
     
@@ -489,12 +500,21 @@ def parse_log_file(log_file_path):
     return parsed_entries
 
 
-
+import ssl
 @app.route('/logs')
 def display_logs():
     log_file_path = '/var/log/haproxy.log'
     parsed_entries = parse_log_file(log_file_path)
     return render_template('logs.html', entries=parsed_entries)
 
+config2 = configparser.ConfigParser()
+config2.read('/etc/haproxy-configurator/ssl.ini')
+
+certificate_path = config2.get('ssl', 'certificate_path')
+private_key_path = config2.get('ssl', 'private_key_path')
+
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+ssl_context.load_cert_chain(certfile=certificate_path, keyfile=private_key_path)
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, ssl_context=ssl_context, debug=True)
