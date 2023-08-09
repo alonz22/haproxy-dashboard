@@ -1,4 +1,4 @@
-![Contributors](https://img.shields.io/github/contributors/username/repo.svg)
+![Contributors](https://img.shields.io/github/contributors/alonz22/HAProxy-Configurator.svg)
 
 
 
