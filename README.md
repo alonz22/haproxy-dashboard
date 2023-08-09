@@ -15,8 +15,9 @@
 
 
 ## HAProxy Configurator
-Disclaimer
+### Disclaimer
 This HAProxy Configurator is a tool to assist in generating configurations for HAProxy, a powerful and widely used open-source load balancer and proxy server. It is intended to simplify the process of creating HAProxy configurations for specific use cases.
+This HAProxy Configurator is not affiliated with, endorsed, or maintained by the HAProxy project. HAProxy is a registered trademark of its respective owners.
 
 ## Description
 The HAProxy Configurator provides a user-friendly web interface where users can input their desired configuration parameters, such as frontend and backend settings, backend servers, load balancing methods, health checks, sticky sessions, SSL certificates, ACLs, and more. The tool then generates the corresponding HAProxy configuration file based on the provided inputs.
@@ -170,7 +171,6 @@ Your feedback and suggestions for improvements are welcome! Please feel free to 
 
 Note: This tool is provided as-is, and we do not offer any warranties or guarantees regarding its performance or suitability for any specific use case.
 
-Disclaimer: This HAProxy Configurator is not affiliated with, endorsed, or maintained by the HAProxy project. HAProxy is a registered trademark of its respective owners.
 
 ## License
 This project is licensed under the MIT License. Feel free to use, modify, and distribute it in accordance with the terms of the license.
