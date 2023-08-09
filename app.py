@@ -45,7 +45,7 @@ def is_backend_exist(backend_name):
 # Function to update HAProxy config file
 
 
-def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check,health_check_tcp, health_check_link, sticky_session,add_header, header_name,header_value, sticky_session_type, is_acl, acl_name,acl_action, acl_backend_name, use_ssl,ssl_cert_path, https_redirect, is_dos, ban_duration, limit_requests, forward_for, is_forbidden_path, forbidden_name, allowed_ip, forbidden_path, sql_injection_check, is_xss, is_remote_upload, add_path_based, redirect_domain_name, root_redirect, redirect_to ):
+def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check,health_check_tcp, health_check_link, sticky_session,add_header, header_name,header_value, sticky_session_type, is_acl, acl_name,acl_action, acl_backend_name, use_ssl,ssl_cert_path, https_redirect, is_dos, ban_duration, limit_requests, forward_for, is_forbidden_path, forbidden_name, allowed_ip, forbidden_path, sql_injection_check, is_xss, is_remote_upload, add_path_based, redirect_domain_name, root_redirect, redirect_to, is_webshells ):
     
     if is_backend_exist(backend_name):
             return f"Backend {backend_name} already exists. Cannot add duplicate."
@@ -97,6 +97,14 @@ def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, 
             haproxy_cfg.write(f"    acl is_test_com hdr(host) -i {redirect_domain_name}\n")
             haproxy_cfg.write(f"    acl is_root path {root_redirect}\n")
             haproxy_cfg.write(f"    http-request redirect location {redirect_to} if is_test_com or is_root\n")
+        
+        if is_webshells:
+            haproxy_cfg.write(f"    option http-buffer-request\n")
+            haproxy_cfg.write(f"    acl is_webshell urlp_reg(payload,eval|system|passthru|shell_exec|exec|popen|proc_open|pcntl_exec)\n")
+            haproxy_cfg.write(f"    acl is_potential_webshell urlp_reg(payload,php|jsp|asp|aspx)\n")
+            haproxy_cfg.write(f"    acl blocked_webshell path_reg -i /(cmd|shell|backdoor|webshell|phpspy|c99|kacak|b374k|log4j|log4shell|wsos|madspot|malicious|evil).*\.php.*\n")
+            haproxy_cfg.write(f"    acl is_suspicious_post hdr(Content-Type) -i application/x-www-form-urlencoded multipart/form-data\n")
+            haproxy_cfg.write(f"    http-request deny if blocked_webshell or is_webshell or is_potential_webshell or is_suspicious_post \n")
             
         haproxy_cfg.write(f"    default_backend {backend_name}\n")
 
@@ -177,11 +185,12 @@ def index():
         is_remote_upload = 'remote_uploads_check' in request.form if 'remote_uploads_check' in request.form else ''
         
         
+        
         add_path_based = 'add_path_based' in request.form
         redirect_domain_name = request.form["redirect_domain_name"]
         root_redirect = request.form["root_redirect"]
         redirect_to = request.form["redirect_to"]
-      
+        is_webshells = 'webshells_check' in request.form if 'webshells_check' in request.form else ''
         # Combine backend server info into a list of tuples (name, ip, port, maxconns)
         
         backend_servers = zip(backend_server_names, backend_server_ips, backend_server_ports, backend_server_maxconns)
@@ -210,7 +219,7 @@ def index():
             sticky_session_type = request.form['sticky_session_type']
 
         # Update the HAProxy config file
-        message = update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check,health_check_tcp, health_check_link, sticky_session ,add_header, header_name, header_value, sticky_session_type, is_acl, acl_name,acl_action, acl_backend_name, use_ssl, ssl_cert_path,https_redirect, is_dos, ban_duration, limit_requests, forward_for , is_forbidden_path, forbidden_name, allowed_ip, forbidden_path, sql_injection_check, is_xss, is_remote_upload, add_path_based, redirect_domain_name, root_redirect, redirect_to )
+        message = update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check,health_check_tcp, health_check_link, sticky_session ,add_header, header_name, header_value, sticky_session_type, is_acl, acl_name,acl_action, acl_backend_name, use_ssl, ssl_cert_path,https_redirect, is_dos, ban_duration, limit_requests, forward_for , is_forbidden_path, forbidden_name, allowed_ip, forbidden_path, sql_injection_check, is_xss, is_remote_upload, add_path_based, redirect_domain_name, root_redirect, redirect_to, is_webshells )
         return render_template('index.html', message=message)
 
     return render_template('index.html')
@@ -454,8 +463,15 @@ def parse_log_file(log_file_path):
         r'`1'
     ]
     
+    webshells_patterns = [
+    r'payload',
+    r'eval|system|passthru|shell_exec|exec|popen|proc_open|pcntl_exec|cmd|shell|backdoor|webshell|phpspy|c99|kacak|b374k|log4j|log4shell|wsos|madspot|malicious|evil.*\.php.*'
+]
+
+    
     combined_xss_pattern = re.compile('|'.join(xss_patterns), re.IGNORECASE)
     combined_sql_pattern = re.compile('|'.join(sql_patterns), re.IGNORECASE)
+    combined_webshells_pattern = re.compile('|'.join(webshells_patterns), re.IGNORECASE)
 
     with open(log_file_path, 'r') as log_file:
         log_lines = log_file.readlines()
@@ -485,6 +501,11 @@ def parse_log_file(log_file_path):
                         illegal_resource = 'Possible Illegal Resource Access Attempt Was Made.'
                     else:
                         illegal_resource = ''
+                        
+                    if combined_webshells_pattern.search(line):
+                        webshell_alert = 'Possible WebShell Attack Attempt Was Made.'
+                    else:
+                        webshell_alert = ''
                     
                     parsed_entries.append({
                         'timestamp': timestamp,
@@ -494,7 +515,8 @@ def parse_log_file(log_file_path):
                         'xss_alert': xss_alert,
                         'sql_alert': sql_alert,
                         'put_method': put_method,
-                        'illegal_resource': illegal_resource
+                        'illegal_resource': illegal_resource,
+                        'webshell_alert': webshell_alert
                         
                     })
     return parsed_entries
@@ -508,7 +530,7 @@ def display_logs():
     return render_template('logs.html', entries=parsed_entries)
 
 config2 = configparser.ConfigParser()
-config2.read('/etc/haproxy-configurator/ssl.ini')
+config2.read('ssl.ini')
 
 certificate_path = config2.get('ssl', 'certificate_path')
 private_key_path = config2.get('ssl', 'private_key_path')
