@@ -57,11 +57,11 @@ Before using the HAProxy Configurator, ensure that your system meets the followi
 
 5. the path of the root directory of the app should be located now at ```/etc/haproxy-configurator```
 
-6. run ```service haproxy-configurator status``` to see if the servcie is running.
+6. run ```service haproxy-configurator status``` to see if the service is running.
 
 
 7.browse the app:
-   ```browse http://your-haproxy-server-ip:5000```
+   ```browse https://your-haproxy-server-ip:5000```
 
 ## SSL Certificate
 
