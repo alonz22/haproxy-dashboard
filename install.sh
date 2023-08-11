@@ -1,15 +1,16 @@
 #!/bin/bash
 
-# Create the folder 'simplelb' inside /etc
+# Create the folder inside /etc
 sudo mkdir -p /etc/haproxy-configurator
 
-# Copy 'config.ini' to the 'simplelb' folder
+# Copy files to the 'haproxy-configurator' folder
+
 sudo cp -r templates/ /etc/haproxy-configurator/
 sudo cp app.py /etc/haproxy-configurator/
 sudo cp ssl.ini /etc/haproxy-configurator/
 sudo cp -r ssl/ /etc/haproxy-configurator/
 
-# Create the service file for 'simplelb' (Assuming you want a systemd service)
+# Create the service file for 'haproxy-configurator' (Assuming you want a systemd service)
 cat << EOF | sudo tee /etc/systemd/system/haproxy-configurator.service
 [Unit]
 Description=Haproxy-Configurator Service By Alon Zur
@@ -27,6 +28,6 @@ EOF
 # Reload systemd to load the new service
 sudo systemctl daemon-reload
 
-# Enable and start the 'simplelb' service
+# Enable and start the service
 sudo systemctl enable haproxy-configurator.service
 sudo systemctl start haproxy-configurator.service
