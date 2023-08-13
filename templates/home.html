@@ -33,12 +33,63 @@
             color: white;
             text-decoration: none;
         }
+        
+        #summary_container{
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+        
+         /* Custom CSS for dark mode */
+      .dark-mode {
+          background-color: #121B2E;
+          color: white;
+      }
+      
+      .dark-mode .header1{
+      background-color: #25354e;
+          color: white;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      }
+      
+      
+      .dark-mode .menu-link{
+      text-decoration: none;
+            padding: 10px 20px;
+            color: white;
+            font-weight: bold;
+      
+      }
+      
+      .dark-mode  .logo {
+      
+            color: #2bb9c7;
+            font-weight: bold;
+      
+      }
+      
+      .dark-mode .fas-fa-globe{
+      color: #2bb9c7;
+      }
+      
+      .dark-mode .menu-link:hover{
+      text-decoration: none;
+            padding: 10px 20px;
+            color: #2bb9c7;
+            font-weight: bold;
+      
+      }
+      
+      .dark-mode #summary_container{
+      
+      box-shadow: 0 0 15px 5px rgba(43, 185, 199, 0.05);
+      border: none;
+      }
+
     </style>
 </head>
 <body>
-<header>
+<header class="header1" id="header1">
     <a href="/home" style="text-decoration: none;">
-        <h3 style="color: grey; font-size: 22px;" class="logo">
+        <h3 style="font-size: 22px;" class="logo">
             <i style="margin: 8px;" class="fas fa-globe"></i>Haproxy Configurator
         </h3>
     </a>
@@ -48,9 +99,15 @@
     <a href="/logs" class="menu-link">Security Events</a>
     <a href="/statistics" class="menu-link">Statictics</a>
     <a  href="http://{{ request.host.split(':')[0] }}:8080/stats" class="menu-link" >HAProxy Stats</a>
+    
+    <div class="custom-control custom-switch ml-auto">
+    <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
+    <label class="custom-control-label" for="darkModeSwitch">Dark Mode</label>
+</div>
+
 </header>
 
-    <div style="box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border-radius: 5px; padding: 40px;" class="container mt-5">
+    <div style=" border-radius: 5px; padding: 40px;" id="summary_container" class="container mt-5">
         <h3 style="margin-bottom: 20px;" class="mt-4">Welcome to Your HAProxy Configurator. Here's A Short Summary:</h3>
 
         <p class="lead"><i style="margin: 8px;" class="fas fa-globe"></i> <strong>{{ frontend_count }}</strong> frontends</p>
@@ -67,5 +124,32 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    
+     <script>
+    // Function to toggle dark mode
+function toggleDarkMode() {
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+
+    // Save user's preference to localStorage
+    const isDarkMode = body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', !isDarkMode); // Invert the value
+}
+
+// Check if dark mode preference is saved in localStorage
+const savedDarkMode = localStorage.getItem('darkMode');
+if (savedDarkMode === 'true') {
+    // Invert the value when applying the class
+    document.body.classList.add('dark-mode');
+}
+
+// Add event listener to the switch
+const darkModeSwitch = document.getElementById('darkModeSwitch');
+darkModeSwitch.addEventListener('change', toggleDarkMode);
+
+
+</script>
+
 </body>
 </html>
