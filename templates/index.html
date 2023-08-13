@@ -14,10 +14,21 @@
             padding-left: 100px;
             align-items: center;
         }
-
+        
+        #frontend_container{
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        
+        }
+        #backend_container{
+        
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        
+        
+        }
         .logo {
             width: 300px; /* Adjust the width as needed */
             height: auto;
+            color: grey;
         }
 
         .menu-link {
@@ -32,30 +43,145 @@
             color: white;
             text-decoration: none;
         }
+        
+         /* Custom CSS for dark mode */
+      .dark-mode {
+          background-color: #121B2E;
+          color: white;
+      }
+      
+      .dark-mode .header1{
+      background-color: #25354e;
+          color: white;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      }
+      .dark-mode .menu-link{
+      text-decoration: none;
+            padding: 10px 20px;
+            color: white;
+            font-weight: bold;
+      
+      }
+      
+      .dark-mode  .logo {
+      
+            color: #2bb9c7;
+            font-weight: bold;
+      
+      }
+      
+      .dark-mode .fas-fa-globe{
+      color: #2bb9c7;
+      }
+      
+      .dark-mode .menu-link:hover{
+      text-decoration: none;
+            padding: 10px 20px;
+            color: #2bb9c7;
+            font-weight: bold;
+      
+      }
+      
+      .dark-mode input[type=text] {
+      color: #BDBDBD;
+      background-color: #25354e;
+      border: none;
+      }
+      
+      .dark-mode input[type=number] {
+      color: white;
+      background-color: #25354e;
+      border: none;
+      }
+      
+      
+      .dark-mode #protocol{
+        color: white;
+        background-color: #25354e;
+        
+        border: none;
+      }
+      
+      
+      .dark-mode #lb_method{
+        color: white;
+        background-color: #25354e;
+        border: none;
+      }
+      
+      .dark-mode  .logo {
+      
+            color: #2bb9c7;
+            font-weight: bold;
+      
+      }
+      
+      
+      .dark-mode #frontend_container{
+      box-shadow: 0 0 15px 5px rgba(43, 185, 199, 0.05);
+      
+      }
+      
+      .dark-mode #backend_container{
+      box-shadow: 0 0 15px 5px rgba(43, 185, 199, 0.05);
+      
+      }
+      
+      .dark-mode #succes_btn{
+      
+      background-color: #2bb9c7;
+        border: none;
+      }
     </style>
 </head>
 <body>
  <!-- Header with the Edit link as a menu -->
  
-    <header>
+    <header id="header1" class="header1">
     <a href="/home" style="text-decoration: none;">
-        <h3 style="color: grey; font-size: 22px;" class="logo">
+        <h3 style="font-size: 22px;" class="logo">
             <i style="margin: 8px;" class="fas fa-globe"></i>Haproxy Configurator
         </h3>
     </a>
-    <a href="/home" class="menu-link">Home</a>
+    <a href="/home" class="menu-link" >Home</a>
     <a href="/" class="menu-link">Add Frontend&Backend</a>
     <a href="/edit" class="menu-link">Edit HAProxy Config</a>
     <a href="/logs" class="menu-link">Security Events</a>
     <a href="/statistics" class="menu-link">Statictics</a>
     <a href="http://{{ request.host.split(':')[0] }}:8080/stats" class="menu-link" >HAProxy Stats</a>
-    
-    
+    <div class="custom-control custom-switch ml-auto">
+    <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
+    <label class="custom-control-label" for="darkModeSwitch">Dark Mode</label>
+</div>
+
+    <script>
+    // Function to toggle dark mode
+function toggleDarkMode() {
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+
+    // Save user's preference to localStorage
+    const isDarkMode = body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', !isDarkMode); // Invert the value
+}
+
+// Check if dark mode preference is saved in localStorage
+const savedDarkMode = localStorage.getItem('darkMode');
+if (savedDarkMode === 'true') {
+    // Invert the value when applying the class
+    document.body.classList.add('dark-mode');
+}
+
+// Add event listener to the switch
+const darkModeSwitch = document.getElementById('darkModeSwitch');
+darkModeSwitch.addEventListener('change', toggleDarkMode);
+
+</script>
 </header>
 
     
     <div class="container mt-4">
-    <div style="box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border-radius: 5px; padding: 20px;" class="container mt-5">
+    <div style=" border-radius: 5px; padding: 20px;" class="container mt-5" id="frontend_container">
          <label style="margin: 20px auto; font-size: 18px; font-weight: bold;"><i style="margin: 8px;" class="fas fa-globe"></i> Add New Frontend:</label><br>
         <!-- Display success message when the form is submitted successfully -->
         {% if message %}
@@ -104,7 +230,7 @@
             
             <div style="margin-top: 15px;" class="form-group">
                 <label for="lb_method">Load Balancing Method:</label>
-                <select class="form-control" name="lb_method">
+                <select class="form-control" name="lb_method" id="lb_method">
                     <option value="roundrobin">Round Robin</option>
                     <option value="leastconn">Least Connections</option>
                     <option value="source">source</option>
@@ -172,6 +298,17 @@
             </div>
         <!-- Remote File Uploads -->
         
+        
+        <!-- Deny Webshells -->
+        
+        <div style="margin-top: 8px; padding-bottom: 15px; display: none;" class="form-check" id="webshells_container" onchange="Webshells()">
+             
+                <input type="checkbox" class="form-check-input" id="webshells_check" name="webshells_check">
+                <label class="form-check-label" for="webshells_check"><i style="margin: 8px;"   <i style="margin: 8px;" class="fas fa-shield-alt"></i>Activate Webshells Protection</label>
+          
+            </div>
+        <!-- Deny Webshells -->
+        
             <div class="form-check" style="margin-top: 8px;">
             <input type="checkbox" class="form-check-input" name="add_acl" id="add_acl">
             <label style="margin-bottom: 10px;" class="form-check-label" for="add_acl"> <i style="margin: 8px;" class="fas fa-user-lock"></i> Add ACL for Frontend</label>
@@ -235,7 +372,7 @@
             
 
 </div>
-        <div style="box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border-radius: 5px; padding: 20px;" class="container mt-5">
+        <div style=" border-radius: 5px; padding: 20px; margin-bottom: 20px;" class="container mt-5" id="backend_container">
             <div class="form-group">
                 <label style="margin-top: 40px; margin-bottom: 30px; font-size: 18px; font-weight: bold;"><i style="margin-right: 8px;" class="fas fa-sitemap"></i> Backend Servers Pool:</label><br>
                 
@@ -405,7 +542,7 @@
                 </div>
                 
             </div>
-            <input style="margin-bottom: 14px; margin-top: 20px;" type="submit" class="btn btn-success" value="Submit">
+            <input style="margin-bottom: 14px; margin-top: 20px;" type="submit" id="succes_btn" class="btn btn-success" value="Submit">
 </div>
             <!-- Button to add more backend server fields -->
             
@@ -587,6 +724,31 @@ document.getElementById('protocol').addEventListener('change', toggleHealthCheck
 }
 
 document.getElementById('protocol').addEventListener('change', toggleSqlInjection);
+</script>
+
+
+
+ <script>
+    function Webshells() {
+    const protocolSelect8 = document.getElementById('protocol');
+    const WebshellsContainer = document.getElementById('webshells_container');
+
+
+    
+ 
+    if (protocolSelect8.value === 'http') {
+        
+        WebshellsContainer.style.display = 'block';
+        
+        } 
+        
+        else {
+        WebshellsContainer.style.display = 'none';
+        }
+    
+}
+
+document.getElementById('protocol').addEventListener('change', Webshells);
 </script>
 
  <script>
