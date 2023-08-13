@@ -2,11 +2,11 @@
 <html>
 <head>
     <title>Log Entries</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
-
+          
         }
         .log-entry {
             padding: 10px;
@@ -25,7 +25,14 @@
             padding-left: 100px;
             align-items: center;
         }
-
+        
+        .log-entry{
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        h3{
+        color: grey;
+        }
         .logo {
             width: 300px; /* Adjust the width as needed */
             height: auto;
@@ -43,14 +50,69 @@
             color: white;
             text-decoration: none;
         }
+        
+          /* Custom CSS for dark mode */
+      .dark-mode {
+          background-color: #121B2E;
+          color: white;
+      }
+      
+      .dark-mode .header1{
+      background-color: #25354e;
+          color: white;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      }
+      
+      
+      .dark-mode .menu-link{
+      text-decoration: none;
+            padding: 10px 20px;
+            color: white;
+            font-weight: bold;
+      
+      }
+      
+      .dark-mode  .logo {
+      
+            color: #2bb9c7;
+            font-weight: bold;
+      
+      }
+      
+      .dark-mode .fas-fa-globe{
+      color: #2bb9c7;
+      }
+      
+      .dark-mode .menu-link:hover{
+      text-decoration: none;
+            padding: 10px 20px;
+            color: #2bb9c7;
+            font-weight: bold;
+      
+      }
+      
+      .dark-mode #status_header{
+      color: #2bb9c7;
+      }
+      
+      .dark-mode .log-entry{
+      box-shadow: 0 0 15px 5px rgba(43, 185, 199, 0.05);
+      background-color: #1E2C42;
+      border: none;
+      }
+      
+      .dark-mode #requested_url{
+        
+      color: #2bb9c7;
+      }
     </style>
     
     
 </head>
 <body>
-<header>
+<header class="header1" id="header1>
     <a href="/home" style="text-decoration: none;">
-        <h3 style="color: grey; font-size: 22px;" class="logo">
+        <h3 style="font-size: 22px;" class="logo">
             <i style="margin: 8px;" class="fas fa-globe"></i>Haproxy Configurator
         </h3>
     </a>
@@ -60,17 +122,46 @@
     <a href="/logs" class="menu-link">Security Events</a>
     <a href="/statistics" class="menu-link">Statictics</a>
     <a href="http://{{ request.host.split(':')[0] }}:8080/stats" class="menu-link" >HAProxy Stats</a>
-    
+    <div class="custom-control custom-switch ml-auto">
+    <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
+    <label class="custom-control-label" for="darkModeSwitch">Dark Mode</label>
+</div>
+
+
+ <script>
+    // Function to toggle dark mode
+function toggleDarkMode() {
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+
+    // Save user's preference to localStorage
+    const isDarkMode = body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', !isDarkMode); // Invert the value
+}
+
+// Check if dark mode preference is saved in localStorage
+const savedDarkMode = localStorage.getItem('darkMode');
+if (savedDarkMode === 'true') {
+    // Invert the value when applying the class
+    document.body.classList.add('dark-mode');
+}
+
+// Add event listener to the switch
+const darkModeSwitch = document.getElementById('darkModeSwitch');
+darkModeSwitch.addEventListener('change', toggleDarkMode);
+
+
+</script>
     
 </header>
-    <h3 style="color: grey; margin-top: 30px; margin-bottom: 30px; margin-left: 10%;">Status 403 Forbidden Log Entries</h3>
+    <h3 style="margin-top: 30px; margin-bottom: 30px; margin-left: 10%;" id="status_header">Status 403 Forbidden Log Entries</h3>
     <div>
         {% for entry in entries %}
-            <div class="log-entry" style="padding: 20px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); width: 80%; margin-left: 10%; margin-bottom: 1%;">
+            <div class="log-entry" style="padding: 20px;  width: 80%; margin-left: 10%; margin-bottom: 1%;">
                 <p><strong>Time Stamp:</strong> {{ entry['timestamp'] }}</p>
                 <p><strong>IP Address:</strong> {{ entry['ip_address'] }}</p>
                 <p><strong>HTTP Method:</strong> {{ entry['http_method'] }}</p>
-                <p><strong>Requested URL:</strong> {{ entry['requested_url'] }}</p>
+                <p id="requested_url"><strong>Requested URL:</strong> {{ entry['requested_url'] }}</p>
                 
                 <!-- XSS Category -->
                 {% if entry['xss_alert'] %}
