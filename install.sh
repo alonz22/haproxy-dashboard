@@ -10,7 +10,7 @@ sudo cp app.py /etc/haproxy-configurator/
 sudo cp ssl.ini /etc/haproxy-configurator/
 sudo cp -r ssl/ /etc/haproxy-configurator/
 
-# Create the service file for 'haproxy-configurator' (Assuming you want a systemd service)
+# Create the service file for 'haproxy-configurator'
 cat << EOF | sudo tee /etc/systemd/system/haproxy-configurator.service
 [Unit]
 Description=Haproxy-Configurator Service By Alon Zur
