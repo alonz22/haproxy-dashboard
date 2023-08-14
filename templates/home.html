@@ -126,29 +126,26 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     
     
-     <script>
+<script>
     // Function to toggle dark mode
-function toggleDarkMode() {
-    const body = document.body;
-    body.classList.toggle('dark-mode');
+    function toggleDarkMode() {
+        const body = document.body;
+        body.classList.toggle('dark-mode');
 
-    // Save user's preference to localStorage
-    const isDarkMode = body.classList.contains('dark-mode');
-    localStorage.setItem('darkMode', !isDarkMode); // Invert the value
-}
+        // Save user's preference to localStorage
+        const isDarkMode = body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode); // Store the actual value
+    }
 
-// Check if dark mode preference is saved in localStorage
-const savedDarkMode = localStorage.getItem('darkMode');
-if (savedDarkMode === 'true') {
-    // Invert the value when applying the class
-    document.body.classList.add('dark-mode');
-}
+    // Check if dark mode preference is saved in localStorage
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode === 'true') {
+        document.body.classList.add('dark-mode');
+    }
 
-// Add event listener to the switch
-const darkModeSwitch = document.getElementById('darkModeSwitch');
-darkModeSwitch.addEventListener('change', toggleDarkMode);
-
-
+    // Add event listener to the switch
+    const darkModeSwitch = document.getElementById('darkModeSwitch');
+    darkModeSwitch.addEventListener('change', toggleDarkMode);
 </script>
 
 </body>
