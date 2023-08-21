@@ -43,24 +43,32 @@ Before using the HAProxy Configurator, ensure that your system meets the followi
 1. clone the repository:
    ```git clone https://github.com/alonz22/HAProxy-Configurator```
 
-2. Install flask and the app dependencies by simply run the Makefile in the cli:
+2. Install pip (if not installed already):
+
+- for ubuntu:
+  ```apt install python3-pip```
+  
+- RedHat:
+  ```yum install python3-pip```
+
+3. Install flask and the app dependencies by simply run the Makefile in the cli:
    ```make install```
    
-3. enter the root folder of the app:
+4. enter the root folder of the app:
    ```cd haproxy-configurator```
 
-4. run the installation script:
+5. run the installation script:
    ```chmod +x install.sh```
    if the script failes to run with "bad interpreter" error, run the following:
    ```sed -i 's/\r//' install.sh```
    ```./install.sh```
 
-5. the path of the root directory of the app should be located now at ```/etc/haproxy-configurator```
+6. the path of the root directory of the app should be located now at ```/etc/haproxy-configurator```
 
-6. run ```service haproxy-configurator status``` to see if the service is running.
+7. run ```service haproxy-configurator status``` to see if the service is running.
 
 
-7.browse the app:
+8.browse the app:
    ```browse https://your-haproxy-server-ip:5000```
 
 ## SSL Certificate
