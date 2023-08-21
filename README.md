@@ -59,9 +59,9 @@ Before using the HAProxy Configurator, ensure that your system meets the followi
 
 5. run the installation script:
    ```chmod +x install.sh```
-   if the script failes to run with "bad interpreter" error, run the following:
-   ```sed -i 's/\r//' install.sh```
-   ```./install.sh```
+if the script failes to run with "bad interpreter" error, run the following:
+   - ```sed -i 's/\r//' install.sh```
+   - ```./install.sh```
 
 6. the path of the root directory of the app should be located now at ```/etc/haproxy-configurator```
 
