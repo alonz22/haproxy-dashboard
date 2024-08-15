@@ -8,7 +8,7 @@ sudo mkdir -p /etc/haproxy-configurator
 sudo cp -r templates/ /etc/haproxy-configurator/
 sudo cp app.py /etc/haproxy-configurator/
 sudo cp Makefile /etc/haproxy-configurator/
-sduo cp requirements.txt /etc/haproxy-configurator/
+sudo cp requirements.txt /etc/haproxy-configurator/
 sudo cp ssl.ini /etc/haproxy-configurator/
 sudo cp -r ssl/ /etc/haproxy-configurator/
 
