@@ -1,42 +1,42 @@
 
 # docker build . -t haproxy-dashboard --progress=plain  --no-cache
-FROM docker.io/debian:bookworm
+FROM docker.io/python:bookworm
 
-RUN set -Eeuo; \
+RUN echo "Update system and install dependencies" && \ 
     # update the system \
     apt-get update && \
     # install packages \
-    apt-get install -y --no-install-recommends python3-pip build-essential && \
+    apt-get install -y --no-install-recommends python3-pip haproxy && \
     # clean the package cache \
     apt-get clean && \
     # clean cache \
-    rm -rf /var/lib/apt/lists/* && \
-    # fix error: externally-managed-environment error \
-    rm /usr/lib/python3*/EXTERNALLY-MANAGED
+    rm -rf /var/lib/apt/lists/*
 
-COPY . /tmp/haproxy-configurator
+        
+ARG USERNAME=haproxy-dashboard
+ARG USER_UID=1001
 
-RUN set -Eeuo; \
-    # Create the folder inside /etc
-    cd /tmp/haproxy-configurator && \
-    mkdir -p /etc/haproxy-configurator/templates && \
-    # Copy files to the 'haproxy-configurator' folder \
-    cp -r templates/* /etc/haproxy-configurator/templates/ && \
-    cp app.py /etc/haproxy-configurator/ && \
-    cp Makefile /etc/haproxy-configurator/ && \
-    cp requirements.txt /etc/haproxy-configurator/ && \
-    cp ssl.ini /etc/haproxy-configurator/ && \
-    cp -r ssl/ /etc/haproxy-configurator/ && \
-    # Remove temporary directory \
-    rm -rf /tmp/haproxy-configurator && \
-    cd /etc/haproxy-configurator/ && \
-    # Install dependencies \
-    make install && \
-    # Create the haproxy directory \
-    mkdir -p /etc/haproxy && \
-    # create an empty haproxy config file \
-    touch /etc/haproxy/haproxy.cfg
+# Create the user
+RUN useradd --uid $USER_UID --gid 0 -m $USERNAME
+
+# Use build --no-cache if change it
+COPY --chown=$USERNAME:0 . /etc/haproxy-configurator
+WORKDIR /etc/haproxy-configurator
+
+
+# Create the haproxy directory and config file \
+RUN mkdir -p /etc/haproxy && \
+    touch /etc/haproxy/haproxy.cfg && \
+    # Give the permission to haproxy \
+    chmod g=u /etc/haproxy/haproxy.cfg
+
+
+# Switch to user
+USER $USERNAME
+
+# Create a virtual environment named and install dependencies
+RUN python -m pip install -r requirements.txt
 
 EXPOSE 5000
 
-CMD [ "/usr/bin/python3", "/etc/haproxy-configurator/app.py" ]
+CMD [ "python", "/etc/haproxy-configurator/app.py" ]
