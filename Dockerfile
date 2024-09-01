@@ -2,11 +2,12 @@
 FROM docker.io/debian:bookworm
 
 # docker run -it  docker.io/debian /bin/bash
-RUN apt-get update; \
-    apt-get install -y python3-pip; \
-    # fix error: externally-managed-environment error \
-    rm /usr/lib/python3*/EXTERNALLY-MANAGED
-
+RUN <<EOF
+    apt-get update &&                                               # update the system
+    apt-get install -y --no-install-recommends python3-pip &&
+    rm -rf /var/lib/apt/lists/* &&                                  # clean cache
+    rm /usr/lib/python3*/EXTERNALLY-MANAGED                         # fix error: externally-managed-environment error
+EOF
 COPY . /tmp/haproxy-configurator
 
 RUN cd /tmp/haproxy-configurator; \
