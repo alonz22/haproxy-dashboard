@@ -11,7 +11,7 @@ sudo cp Makefile /etc/haproxy-configurator/
 sduo cp requirements.txt /etc/haproxy-configurator/
 sudo cp ssl.ini /etc/haproxy-configurator/
 sudo cp -r ssl/ /etc/haproxy-configurator/
-
+sudo cp auth.cfg /etc/haproxy-configurator/
 
 # Create the service file for 'haproxy-configurator'
 cat << EOF | sudo tee /etc/systemd/system/haproxy-configurator.service
