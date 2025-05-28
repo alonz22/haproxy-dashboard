@@ -14,7 +14,7 @@
 
 
 
-## HAProxy Configurator - v1.3.2
+## HAProxy Configurator - v1.3.3
 ### Disclaimer
 This HAProxy Configurator is a tool to assist in generating configurations for HAProxy, a powerful and widely used open-source load balancer and proxy server. It is intended to simplify the process of creating HAProxy configurations for specific use cases.
 This HAProxy Configurator is not affiliated with, endorsed, or maintained by the HAProxy project. HAProxy is a registered trademark of its respective owners.
