@@ -8,6 +8,34 @@ from OpenSSL import SSL
 import configparser
 app = Flask(__name__)
 
+# Load basic auth credentials
+auth_config = configparser.ConfigParser()
+auth_config.read('/etc/haproxy-configurator/auth.cfg')
+BASIC_AUTH_USERNAME = auth_config.get('auth', 'username')
+BASIC_AUTH_PASSWORD = auth_config.get('auth', 'password')
+
+from functools import wraps
+from flask import Response
+
+def check_auth(username, password):
+    return username == BASIC_AUTH_USERNAME and password == BASIC_AUTH_PASSWORD
+
+def authenticate():
+    return Response(
+        'Authentication required.', 401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'}
+    )
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
+
 
 
 
@@ -146,6 +174,7 @@ def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, 
 
 
 @app.route('/', methods=['GET', 'POST'])
+@requires_auth
 def index():
     
     if request.method == 'POST':
@@ -228,6 +257,7 @@ import subprocess
 
 
 @app.route('/edit', methods=['GET', 'POST'])
+@requires_auth
 def edit_haproxy_config():
     if request.method == 'POST':
         edited_config = request.form['haproxy_config']
@@ -295,6 +325,7 @@ def count_frontends_and_backends():
     return frontend_count, backend_count, acl_count, layer7_count, layer4_count
 
 @app.route('/home')
+@requires_auth
 def home():
     frontend_count, backend_count, acl_count, layer7_count, layer4_count = count_frontends_and_backends()
 
@@ -332,6 +363,7 @@ def parse_haproxy_stats(stats_data):
     
     
 @app.route('/statistics')
+@requires_auth
 def display_haproxy_stats():
     haproxy_stats = fetch_haproxy_stats()
     parsed_stats = parse_haproxy_stats(haproxy_stats)
@@ -524,6 +556,7 @@ def parse_log_file(log_file_path):
 
 import ssl
 @app.route('/logs')
+@requires_auth
 def display_logs():
     log_file_path = '/var/log/haproxy.log'
     parsed_entries = parse_log_file(log_file_path)
@@ -539,4 +572,4 @@ ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
 ssl_context.load_cert_chain(certfile=certificate_path, keyfile=private_key_path)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, ssl_context=ssl_context, debug=True)
+    app.run(host='::', port=5000, ssl_context=ssl_context, debug=True)
