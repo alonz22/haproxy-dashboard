@@ -35,11 +35,6 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-
-
-
-
-
 def is_frontend_exist(frontend_name, frontend_ip, frontend_port):
     with open('/etc/haproxy/haproxy.cfg', 'r') as haproxy_cfg:
         frontend_found = False
@@ -57,27 +52,21 @@ def is_frontend_exist(frontend_name, frontend_ip, frontend_port):
                     return True
     return False
 
-
 def is_backend_exist(backend_name):
     with open('/etc/haproxy/haproxy.cfg', 'r') as haproxy_cfg:
-        backend_found = False
         for line in haproxy_cfg:
-            if line.strip().startswith('backend'):
-                _, existing_backend_name = line.strip().split(' ', 1)
-                if existing_backend_name.strip() == backend_name:
-                    backend_found = True
-                else:
-                    backend_found = False
-    return backend_found
-                    
-# Function to update HAProxy config file
-
+            line = line.strip()
+            if line.startswith('backend') and not line.startswith('#'):
+                parts = line.split()
+                if len(parts) >= 2 and parts[1] == backend_name:
+                    return True
+    return False
 
 def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, protocol, backend_name, backend_servers, health_check,health_check_tcp, health_check_link, sticky_session,add_header, header_name,header_value, sticky_session_type, is_acl, acl_name,acl_action, acl_backend_name, use_ssl,ssl_cert_path, https_redirect, is_dos, ban_duration, limit_requests, forward_for, is_forbidden_path, forbidden_name, allowed_ip, forbidden_path, sql_injection_check, is_xss, is_remote_upload, add_path_based, redirect_domain_name, root_redirect, redirect_to, is_webshells ):
-    
+
     if is_backend_exist(backend_name):
             return f"Backend {backend_name} already exists. Cannot add duplicate."
-    
+
     with open('/etc/haproxy/haproxy.cfg', 'a') as haproxy_cfg:
         haproxy_cfg.write(f"\nfrontend {frontend_name}\n")
         if is_frontend_exist(frontend_name, frontend_ip, frontend_port):
@@ -116,16 +105,16 @@ def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, 
         if is_acl:
             haproxy_cfg.write(f"    acl {acl_name} {acl_action}\n")
             haproxy_cfg.write(f"    use_backend {acl_backend_name} if {acl_name}\n")
-        
+
         if is_forbidden_path:
             haproxy_cfg.write(f"    acl {forbidden_name} src {allowed_ip}\n")
             haproxy_cfg.write(f"    http-request deny if !{forbidden_name} {{ path_beg {forbidden_path} }}\n")
-        
+
         if add_path_based:
             haproxy_cfg.write(f"    acl is_test_com hdr(host) -i {redirect_domain_name}\n")
             haproxy_cfg.write(f"    acl is_root path {root_redirect}\n")
             haproxy_cfg.write(f"    http-request redirect location {redirect_to} if is_test_com or is_root\n")
-        
+
         if is_webshells:
             haproxy_cfg.write(f"    option http-buffer-request\n")
             haproxy_cfg.write(f"    acl is_webshell urlp_reg(payload,eval|system|passthru|shell_exec|exec|popen|proc_open|pcntl_exec)\n")
@@ -133,12 +122,12 @@ def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, 
             haproxy_cfg.write(f"    acl blocked_webshell path_reg -i /(cmd|shell|backdoor|webshell|phpspy|c99|kacak|b374k|log4j|log4shell|wsos|madspot|malicious|evil).*\.php.*\n")
             haproxy_cfg.write(f"    acl is_suspicious_post hdr(Content-Type) -i application/x-www-form-urlencoded multipart/form-data\n")
             haproxy_cfg.write(f"    http-request deny if blocked_webshell or is_webshell or is_potential_webshell or is_suspicious_post \n")
-            
+
         haproxy_cfg.write(f"    default_backend {backend_name}\n")
 
     with open('/etc/haproxy/haproxy.cfg', 'a') as haproxy_cfg:
         haproxy_cfg.write(f"\nbackend {backend_name}\n")
-        
+
         if sticky_session and sticky_session_type == 'cookie':
             haproxy_cfg.write("    cookie SERVERID insert indirect nocache\n")
         if sticky_session and sticky_session_type == 'stick-table':
@@ -155,28 +144,27 @@ def update_haproxy_config(frontend_name, frontend_ip, frontend_port, lb_method, 
             if health_check_tcp:
                 haproxy_cfg.write(f"    option tcp-check\n")
                 haproxy_cfg.write("    tcp-check send PING" + r"\r\n" + "\n")
-                haproxy_cfg.write("    tcp-check send QUIT" + r"\r\n" + "\n")       
-        for backend_server_info in backend_servers:
-            backend_server_name, backend_server_ip, backend_server_port, backend_server_maxconn = backend_server_info
-            if backend_server_name and backend_server_ip and backend_server_port:
-                haproxy_cfg.write(f"    server {backend_server_name} {backend_server_ip}:{backend_server_port} check")
-            if sticky_session and sticky_session_type == 'cookie':
-                if backend_server_name and backend_server_ip and backend_server_port:
-                    haproxy_cfg.write(f" cookie {backend_server_name}")
-            if backend_server_maxconn:
-                haproxy_cfg.write(f" maxconn {backend_server_maxconn}")
-            haproxy_cfg.write("\n")
-    
+                haproxy_cfg.write("    tcp-check send QUIT" + r"\r\n" + "\n")
+        # Process all backend servers
+        for i, backend_server in enumerate(backend_servers, 1):
+            if len(backend_server) >= 3:  # Ensure we have name, ip and port
+                backend_server_name = backend_server[0] or f"server{i}"
+                backend_server_ip = backend_server[1]
+                backend_server_port = backend_server[2]
+                backend_server_maxconn = backend_server[3] if len(backend_server) > 3 else None
+
+                line = f"    server {backend_server_name} {backend_server_ip}:{backend_server_port} check"
+                if sticky_session and sticky_session_type == 'cookie':
+                    line += f" cookie {backend_server_name}"
+                if backend_server_maxconn:
+                    line += f" maxconn {backend_server_maxconn}"
+                haproxy_cfg.write(line + "\n")
+
     return "Frontend and Backend added successfully."
-
-
-
-
 
 @app.route('/', methods=['GET', 'POST'])
 @requires_auth
 def index():
-    
     if request.method == 'POST':
         frontend_name = request.form['frontend_name']
         frontend_ip = request.form['frontend_ip']
@@ -184,13 +172,22 @@ def index():
         lb_method = request.form['lb_method']
         protocol = request.form['protocol']
         backend_name = request.form['backend_name']
-        add_header = 'add_header' in request.form  if 'add_header' in request.form else ''
+        add_header = 'add_header' in request.form if 'add_header' in request.form else ''
         header_name = request.form['header_name']
         header_value = request.form['header_value']
-        backend_server_names = request.form.getlist('backend_server_names')
-        backend_server_ips = request.form.getlist('backend_server_ips')
-        backend_server_ports = request.form.getlist('backend_server_ports')
-        backend_server_maxconns = request.form.getlist('backend_server_maxconns')
+        # Get all backend servers data
+        backend_server_names = request.form.getlist('backend_server_names[]')
+        backend_server_ips = request.form.getlist('backend_server_ips[]')
+        backend_server_ports = request.form.getlist('backend_server_ports[]')
+        backend_server_maxconns = request.form.getlist('backend_server_maxconns[]')
+        # Log to file for debugging
+       # with open("/tmp/backend_debug.log", "a") as log:
+       #     log.write("== Received Backends ==\n")
+       #     log.write(f"Names: {backend_server_names}\n")
+       #     log.write(f"IPs: {backend_server_ips}\n")
+       #     log.write(f"Ports: {backend_server_ports}\n")
+       #     log.write(f"Maxconns: {backend_server_maxconns}\n")
+
         is_acl = 'add_acl' in request.form
         acl_name = request.form['acl'] if 'acl' in request.form else ''
         acl_action = request.form['acl_action'] if 'acl_action' in request.form else ''
@@ -202,28 +199,37 @@ def index():
         ban_duration = request.form["ban_duration"]
         limit_requests = request.form["limit_requests"]
         forward_for = 'forward_for_check' in request.form
-        
+
         is_forbidden_path = 'add_acl_path' in request.form
         forbidden_name = request.form["forbidden_name"]
         allowed_ip = request.form["allowed_ip"]
         forbidden_path = request.form["forbidden_path"]
-        
 
         sql_injection_check = 'sql_injection_check' in request.form if 'sql_injection_check' in request.form else ''
         is_xss = 'xss_check' in request.form if 'xss_check' in request.form else ''
         is_remote_upload = 'remote_uploads_check' in request.form if 'remote_uploads_check' in request.form else ''
-        
-        
-        
+
         add_path_based = 'add_path_based' in request.form
         redirect_domain_name = request.form["redirect_domain_name"]
         root_redirect = request.form["root_redirect"]
         redirect_to = request.form["redirect_to"]
         is_webshells = 'webshells_check' in request.form if 'webshells_check' in request.form else ''
+
         # Combine backend server info into a list of tuples (name, ip, port, maxconns)
-        
-        backend_servers = zip(backend_server_names, backend_server_ips, backend_server_ports, backend_server_maxconns)
-        
+        backend_servers = []
+        for i in range(len(backend_server_ips)):
+            name = backend_server_names[i] if i < len(backend_server_names) else f"server{i+1}"
+            ip = backend_server_ips[i] if i < len(backend_server_ips) else ''
+            port = backend_server_ports[i] if i < len(backend_server_ports) else ''
+            maxconn = backend_server_maxconns[i] if i < len(backend_server_maxconns) else None
+
+            if ip and port:  # Only add if we have IP and port
+                backend_servers.append((
+                    name,
+                    ip,
+                    port,
+                    maxconn
+                ))
         # Check if frontend or port already exists
         if is_frontend_exist(frontend_name, frontend_ip, frontend_port):
             return render_template('index.html', message="Frontend or Port already exists. Cannot add duplicate.")
@@ -235,7 +241,7 @@ def index():
             health_check = 'health_check' in request.form
             if health_check:
                 health_check_link = request.form['health_check_link']
-                
+
         health_check_tcp = False
         if protocol == 'tcp':
             health_check_tcp = 'health_check2' in request.form
@@ -253,7 +259,7 @@ def index():
 
     return render_template('index.html')
 
-import subprocess
+
 
 
 @app.route('/edit', methods=['GET', 'POST'])
@@ -286,7 +292,6 @@ def edit_haproxy_config():
                 check_output += f"\n\nError occurred:\n{error_message}"
             else:
                 # If no error, run haproxy -D -f to reload HAProxy
-                #reload_result = subprocess.run(['haproxy', '-D', '-f', '/etc/haproxy/haproxy.cfg'], capture_output=True, text=True)
                 reload_result = subprocess.run(['systemctl', 'restart', 'haproxy', '/etc/haproxy/haproxy.cfg'], capture_output=True, text=True)
                 check_output += f"\n\nHAProxy Restart Output:\n{reload_result.stdout}"
 
@@ -304,7 +309,7 @@ def count_frontends_and_backends():
     acl_count = 0
     layer7_count = 0
     layer4_count = 0
-    
+
     with open('/etc/haproxy/haproxy.cfg', 'r') as haproxy_cfg:
         lines = haproxy_cfg.readlines()
 
@@ -318,7 +323,7 @@ def count_frontends_and_backends():
             if line.startswith('mode http'):
                 layer7_count += 1
             if line.startswith('mode tcp'):
-                layer4_count += 1     
+                layer4_count += 1
             elif line.startswith('backend '):
                 backend_count += 1
 
@@ -328,9 +333,7 @@ def count_frontends_and_backends():
 @requires_auth
 def home():
     frontend_count, backend_count, acl_count, layer7_count, layer4_count = count_frontends_and_backends()
-
     return render_template('home.html', frontend_count=frontend_count, backend_count=backend_count, acl_count=acl_count ,layer7_count=layer7_count, layer4_count=layer4_count )
-
 
 HAPROXY_STATS_URL = 'http://127.0.0.1:8080/;csv'
 
@@ -360,8 +363,7 @@ def parse_haproxy_stats(stats_data):
                 'conn_tot': row['conn_tot'],
             })
     return data
-    
-    
+
 @app.route('/statistics')
 @requires_auth
 def display_haproxy_stats():
@@ -408,8 +410,6 @@ def display_haproxy_stats():
     <a href="/logs" class="menu-link">Security Events</a>
     <a href="/statistics" class="menu-link">Statictics</a>
     <a href="http://{{ request.host.split(':')[0] }}:8080/stats" class="menu-link" >HAProxy Stats</a>
-    
-    
 </header>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <div class="container">
@@ -445,10 +445,6 @@ def display_haproxy_stats():
         </div>
     ''', stats=parsed_stats)
 
-
-
-import re
-
 def parse_log_file(log_file_path):
     parsed_entries = []
     xss_patterns = [
@@ -467,7 +463,7 @@ def parse_log_file(log_file_path):
         r'onload',
         r'javascript'
     ]
-    
+
     sql_patterns = [
         r';',
         r'substring',
@@ -494,13 +490,13 @@ def parse_log_file(log_file_path):
         r'1=1',
         r'`1'
     ]
-    
+
     webshells_patterns = [
     r'payload',
     r'eval|system|passthru|shell_exec|exec|popen|proc_open|pcntl_exec|cmd|shell|backdoor|webshell|phpspy|c99|kacak|b374k|log4j|log4shell|wsos|madspot|malicious|evil.*\.php.*'
 ]
 
-    
+
     combined_xss_pattern = re.compile('|'.join(xss_patterns), re.IGNORECASE)
     combined_sql_pattern = re.compile('|'.join(sql_patterns), re.IGNORECASE)
     combined_webshells_pattern = re.compile('|'.join(webshells_patterns), re.IGNORECASE)
@@ -515,7 +511,7 @@ def parse_log_file(log_file_path):
                     ip_address = match.group(2)
                     http_method = match.group(3)
                     requested_url = match.group(4)
-                    
+
                     if combined_xss_pattern.search(line):
                         xss_alert = 'Possible XSS Attack Was Identified.'
                     else:
@@ -528,17 +524,17 @@ def parse_log_file(log_file_path):
                         put_method = 'Possible Remote File Upload Attempt Was Made.'
                     else:
                         put_method = ''
-                    
+
                     if "admin" in line:
                         illegal_resource = 'Possible Illegal Resource Access Attempt Was Made.'
                     else:
                         illegal_resource = ''
-                        
+
                     if combined_webshells_pattern.search(line):
                         webshell_alert = 'Possible WebShell Attack Attempt Was Made.'
                     else:
                         webshell_alert = ''
-                    
+
                     parsed_entries.append({
                         'timestamp': timestamp,
                         'ip_address': ip_address,
@@ -549,10 +545,8 @@ def parse_log_file(log_file_path):
                         'put_method': put_method,
                         'illegal_resource': illegal_resource,
                         'webshell_alert': webshell_alert
-                        
                     })
     return parsed_entries
-
 
 import ssl
 @app.route('/logs')
