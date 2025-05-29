@@ -14,29 +14,35 @@
 
 
 
-## HAProxy Configurator - v1.3.3
-### Disclaimer
-This HAProxy Configurator is a tool to assist in generating configurations for HAProxy, a powerful and widely used open-source load balancer and proxy server. It is intended to simplify the process of creating HAProxy configurations for specific use cases.
-This HAProxy Configurator is not affiliated with, endorsed, or maintained by the HAProxy project. HAProxy is a registered trademark of its respective owners.
+# HAProxy Configurator - v1.3.4
 
-## Description
-The HAProxy Configurator provides a user-friendly web interface where users can input their desired configuration parameters, such as frontend and backend settings, backend servers, load balancing methods, health checks, sticky sessions, SSL certificates, ACLs, and more. The tool then generates the corresponding HAProxy configuration file based on the provided inputs.
+### ⚠️ Disclaimer
+This HAProxy Configurator is an independent tool designed to simplify HAProxy configuration through a web interface. It is not affiliated with or endorsed by the official HAProxy project.
 
-Important Notes
-This tool is intended to be used as an aid in generating HAProxy configurations and to make the process more accessible and efficient. However, it does not replace or outperform HAProxy's built-in functionality or configuration capabilities.
+---
 
-While we strive to ensure the accuracy and correctness of the generated configurations, it is essential to review the resulting configuration file carefully before deploying it in production environments. The user is responsible for thoroughly testing and verifying the configuration for their specific use case.
+## 🚀 What’s New in 1.3.4
 
-## Requirements
-Before using the HAProxy Configurator, ensure that your system meets the following requirements:
+- ✅ **Refactored codebase** – cleaner, modular structure.
+- 🌑 **Dark mode UI** – toggle-friendly interface for low-light environments.
+- 🔐 **Basic HTTP Authentication** – secured access via `.cfg`-based credentials.
+- 🔧 **Dynamic Backend Server Addition** – add servers on-the-fly without page reloads.
+- 🌐 **IPv6 Frontend Support** – configure IPv6 listeners.
 
-1.A user with high privileges (sudo or root).
+---
 
-2.HAProxy: HAProxy must be installed on your system. The configurator relies on HAProxy to manage load balancing and proxying. Please install HAProxy using the package manager for your specific OS.
+## 📋 Description
+HAProxy Configurator offers a rich GUI to create, validate, and manage HAProxy configurations. Features include frontend/backend setup, health checks, ACLs, SSL, WAF rules, and more — all without manually editing `haproxy.cfg`.
 
-3.Python 3: The HAProxy Configurator is implemented in Python 3. Make sure Python 3 is installed on your system to run the configurator.
+---
 
-4.Port 5000 Available: The configurator runs as a web application and listens on port 5000. Ensure that port 5000 is available and not occupied by any other process.
+## ✅ Requirements
+
+1. **Root or sudo privileges**
+2. **HAProxy** installed on your system
+3. **Python 3**
+4. Port `5000` must be available (for the web interface)
+
 
 ## Install:
 
@@ -51,21 +57,23 @@ Before using the HAProxy Configurator, ensure that your system meets the followi
 - RedHat:
   ```yum install python3-pip```
 
-3. Install flask and the app dependencies by simply run the Makefile in the cli:
-   ```make install```
-   
-4. enter the root folder of the app:
-   ```cd haproxy-configurator```
 
-5. run the installation script:
+3. enter the root folder of the app:
+   ```cd haproxy-configurator```
+   
+5. Install flask and the app dependencies by simply run the Makefile in the cli:
+   ```pip install -r requirements.txt```
+
+6. run the installation script:
    ```chmod +x install.sh```
+   
 if the script failes to run with "bad interpreter" error, run the following:
    - ```sed -i 's/\r//' install.sh```
    - ```./install.sh```
 
-6. the path of the root directory of the app should be located now at ```/etc/haproxy-configurator```
+8. the path of the root directory of the app should be located now at ```/etc/haproxy-configurator```
 
-7. run ```service haproxy-configurator status``` to see if the service is running.
+9. run ```service haproxy-configurator status``` to see if the service is running.
 
 
 8.browse the app:
@@ -152,10 +160,9 @@ Quick access to critical configuration details
 
 
 ## Roadmap Overview
-### Phase 1: User Experience Enhancements
-1.Dark Mode: Introduce a sleek and comfortable dark mode interface, providing an alternative visual style for users who prefer reduced screen brightness during prolonged usage.
 
-### Phase 2: Performance and Flexibility
+
+### Performance and Flexibility
 
 1.HTTP Keep-Alive Option: Implement an option to enable HTTP Keep-Alive within the frontend configurations. This feature enhances connection efficiency by allowing multiple requests and responses to be sent over a single TCP connection.
 
