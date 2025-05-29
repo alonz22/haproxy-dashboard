@@ -8,7 +8,7 @@
 
 
 
-[![Version](https://img.shields.io/badge/version-1.3.2-brightgreen.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.3.4-brightgreen.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 
