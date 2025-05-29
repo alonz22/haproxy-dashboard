@@ -61,19 +61,19 @@ HAProxy Configurator offers a rich GUI to create, validate, and manage HAProxy c
 3. enter the root folder of the app:
    ```cd haproxy-configurator```
    
-5. Install flask and the app dependencies by simply run the Makefile in the cli:
+4. Install flask and the app dependencies by simply run the Makefile in the cli:
    ```pip install -r requirements.txt```
 
-6. run the installation script:
+5. run the installation script:
    ```chmod +x install.sh```
    
 if the script failes to run with "bad interpreter" error, run the following:
    - ```sed -i 's/\r//' install.sh```
    - ```./install.sh```
 
-8. the path of the root directory of the app should be located now at ```/etc/haproxy-configurator```
+6. the path of the root directory of the app should be located now at ```/etc/haproxy-configurator```
 
-9. run ```service haproxy-configurator status``` to see if the service is running.
+7. run ```service haproxy-configurator status``` to see if the service is running.
 
 
 8.browse the app:
