@@ -26,7 +26,7 @@ This HAProxy Configurator is an independent tool designed to simplify HAProxy co
 - ✅ **Refactored codebase** – cleaner, modular structure.
 - 🌑 **Dark mode UI** – toggle-friendly interface for low-light environments.
 - 🔐 **Basic HTTP Authentication** – secured access via `.cfg`-based credentials.
-- 🔧 **Dynamic Backend Server Addition** – add servers on-the-fly without page reloads.
+- 🔧 **Dynamic Backend Server Addition** - no more static backend servers adding in the "add Frontend & Backend" page.
 - 🌐 **IPv6 Frontend Support** – configure IPv6 listeners.
 
 ---
