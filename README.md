@@ -88,15 +88,23 @@ Launch the HAProxy Configurator by navigating to https://your-haproxy-server-ip:
 
 Fill in the required parameters and options for your HAProxy configuration.
 
+
+### Home Page:
+
+![home page](https://github.com/user-attachments/assets/8ef82eb4-063c-41fb-9796-2ba97b1ae7fa)
+
+
 ### Frontend Section:
 
-![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/04413c22-c947-4599-9659-e0274730f061)
+![frontend_section](https://github.com/user-attachments/assets/3f32f221-ffcd-4bca-8fa0-4396845e77f8)
+
 
 
 
 ### backend section:
+![backend_section](https://github.com/user-attachments/assets/d17d9be9-869b-467a-98af-695420403c90)
 
-![image](https://github.com/alonz22/HAProxy-Configurator/assets/72250573/6af98d59-734a-4272-84aa-87c47123017a)
+
 
 
 ### You may as well edit the config file itself via "Edit HAProxy Config":
